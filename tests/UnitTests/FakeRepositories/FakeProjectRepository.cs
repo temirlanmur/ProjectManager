@@ -12,9 +12,19 @@ public class FakeProjectRepository : IProjectRepository
         _projects = projects;
     }
 
+    public async Task<Project?> GetById(Guid projectId)
+    {
+        return _projects.FirstOrDefault(p => p.Id == projectId);
+    }
+
+    public async Task<Project?> GetByIdWithTasksAndComments(Guid projectId)
+    {
+        return _projects.FirstOrDefault(p => p.Id == projectId);
+    }
+
     public async Task<IEnumerable<Project>> ListForUser(Guid userId)
     {
-        return _projects.Where(p => p.IsPublic == true || p.OwnerId == userId);
+        return _projects.Where(p => p.IsPublic == true || p.OwnerId == userId || p.Collaborators.Any(c => c.Id == userId));
     }
 
     public async Task<IEnumerable<Project>> ListPublic()

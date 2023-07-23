@@ -1,7 +1,7 @@
 ﻿namespace ProjectManager.Application.DTOs.ProjectDTOs;
 
 public record CreateProjectDTO(
-    Guid ownerId,
-    string title,
-    string description = "",
-    bool isPublic = false);
+    Guid OwnerId,
+    string Title,
+    string Description = "",
+    bool IsPublic = false);

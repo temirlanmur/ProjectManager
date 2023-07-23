@@ -1,5 +1,6 @@
 using FluentValidation;
 using ProjectManager.Application.DTOs.ProjectDTOs;
+using ProjectManager.Application.Exceptions;
 using ProjectManager.Application.Interfaces;
 using ProjectManager.Application.Services;
 using ProjectManager.Application.Validators;
@@ -11,10 +12,12 @@ namespace UnitTests
     public class ProjectServiceTests
     {
         IValidator<CreateProjectDTO> createProjectDtoValidator;
+        IValidator<UpdateProjectDTO> updateProjectDtoValidator;
 
         public ProjectServiceTests()
         {
             createProjectDtoValidator = new CreateProjectDTOValidator();
+            updateProjectDtoValidator = new UpdateProjectDTOValidator();
         }
 
         [Fact]
@@ -27,10 +30,13 @@ namespace UnitTests
                 new Project(Guid.NewGuid(), "PrivateProject", isPublic: false),
             };
             IProjectRepository fakeRepo = new FakeProjectRepository(projects);
-            IProjectService service = new ProjectService(fakeRepo, createProjectDtoValidator);
+            IProjectService service = new ProjectService(
+                fakeRepo,
+                createProjectDtoValidator,
+                updateProjectDtoValidator);
 
             // Act:
-            IEnumerable<Project> result = await service.ListProjects();
+            IEnumerable<Project> result = await service.List();
 
             // Assert:
             Assert.DoesNotContain(projects[1], result);
@@ -49,10 +55,13 @@ namespace UnitTests
                 new Project(Guid.NewGuid(), "PrivateProject", isPublic: false),
             };
             IProjectRepository fakeRepo = new FakeProjectRepository(projects);
-            IProjectService service = new ProjectService(fakeRepo, createProjectDtoValidator);
+            IProjectService service = new ProjectService(
+                fakeRepo,
+                createProjectDtoValidator,
+                updateProjectDtoValidator);
 
             // Act:
-            IEnumerable<Project> result = await service.ListProjects(userId);
+            IEnumerable<Project> result = await service.List(userId);
 
             // Assert:
             Assert.Contains(result, p => p.Title == "UserProject");
@@ -63,12 +72,90 @@ namespace UnitTests
         public async Task Create_Throws_ValidationException()
         {
             // Arrange:
-            CreateProjectDTO dto = new(new Guid(), "A");
+            CreateProjectDTO dto = new(Guid.NewGuid(), "A");
             IProjectRepository fakeRepo = new FakeProjectRepository(new List<Project>());
-            IProjectService service = new ProjectService(fakeRepo, createProjectDtoValidator);
+            IProjectService service = new ProjectService(
+                fakeRepo,
+                createProjectDtoValidator,
+                updateProjectDtoValidator);
 
             // Assert:            
             await Assert.ThrowsAsync<ValidationException>(() => service.Create(dto));
+        }
+
+        [Fact]
+        public async Task Getting_NonExistentProject_Throws_NotFoundException()
+        {
+            // Arrange:            
+            IProjectRepository fakeRepo = new FakeProjectRepository(new List<Project>());
+            IProjectService service = new ProjectService(
+                fakeRepo,
+                createProjectDtoValidator,
+                updateProjectDtoValidator);
+
+            // Assert:            
+            await Assert.ThrowsAsync<EntityNotFoundException>(() => service.Get(Guid.NewGuid()));
+        }
+
+        [Fact]
+        public async Task Owner_IsAllowedTo_UpdateProject()
+        {
+            // Arrange:
+            Guid ownerId = Guid.NewGuid();
+            Guid projectId = Guid.NewGuid();
+            UpdateProjectDTO dto = new(ownerId, projectId, "NewTitle", "NewDescription", true);
+            IProjectRepository fakeRepo = new FakeProjectRepository(new List<Project>
+            {
+                new Project(ownerId, "OldTitle", isPublic: false) { Id = projectId }
+            });
+            IProjectService service = new ProjectService(
+                fakeRepo,
+                createProjectDtoValidator,
+                updateProjectDtoValidator);
+
+            // Act:
+            var updatedProject = await service.Update(dto);
+
+            // Assert:
+            Assert.Equal("NewTitle", updatedProject.Title);
+        }
+
+        [Fact]
+        public async Task NotOwner_IsNotAllowedTo_UpdateProject()
+        {
+            // Arrange:
+            Guid projectId = Guid.NewGuid();
+            UpdateProjectDTO dto = new(Guid.NewGuid(), projectId, "NewTitle", "NewDescription", true);
+            IProjectRepository fakeRepo = new FakeProjectRepository(new List<Project>
+            {
+                new Project(Guid.NewGuid(), "OldTitle", isPublic: true) { Id = projectId }
+            });
+            IProjectService service = new ProjectService(
+                fakeRepo,
+                createProjectDtoValidator,
+                updateProjectDtoValidator);
+
+            // Assert:
+            await Assert.ThrowsAsync<NotAllowedException>(() => service.Update(dto));
+        }
+
+        [Fact]
+        public async Task Updating_PrivateProject_Throws_NotFoundException()
+        {
+            // Arrange:
+            Guid projectId = Guid.NewGuid();
+            UpdateProjectDTO dto = new(Guid.NewGuid(), projectId, "NewTitle", "NewDescription", true);
+            IProjectRepository fakeRepo = new FakeProjectRepository(new List<Project>
+            {
+                new Project(Guid.NewGuid(), "OldTitle", isPublic: false) { Id = projectId }
+            });
+            IProjectService service = new ProjectService(
+                fakeRepo,
+                createProjectDtoValidator,
+                updateProjectDtoValidator);
+
+            // Assert:
+            await Assert.ThrowsAsync<EntityNotFoundException>(() => service.Update(dto));
         }
     }
 }

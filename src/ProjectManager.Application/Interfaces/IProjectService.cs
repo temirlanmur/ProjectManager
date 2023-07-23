@@ -10,7 +10,7 @@ public interface IProjectService
     /// </summary>
     /// <param name="userId">Authenticated user's ID, or null, if the user is unauthenticated.</param>
     /// <returns></returns>
-    Task<IEnumerable<Project>> ListProjects(Guid? userId = null);
+    Task<IEnumerable<Project>> List(Guid? userId = null);
     
     /// <summary>
     /// Creates new project.
@@ -18,4 +18,18 @@ public interface IProjectService
     /// <param name="dto"></param>
     /// <returns></returns>
     Task<Project> Create(CreateProjectDTO dto);
+
+    /// <summary>
+    /// Gets project by its ID.
+    /// </summary>
+    /// <param name="projectId"></param>
+    /// <returns></returns>
+    Task<Project> Get(Guid projectId);
+
+    /// <summary>
+    /// Updates project.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    Task<Project> Update(UpdateProjectDTO dto);
 }
