@@ -11,110 +11,83 @@ namespace UnitTests
 {
     public class ProjectServiceTests
     {
-        IValidator<CreateProjectDTO> createProjectDtoValidator;
-        IValidator<UpdateProjectDTO> updateProjectDtoValidator;
+        readonly Project publicProject;
+        readonly Project privateProject;
+
+        readonly User publicProjectOwner;
+        readonly User privateProjectOwner;
+
+        IProjectRepository fakeProjectRepo;
+        IUserRepository fakeUserRepo;        
+
+        readonly IValidator<CreateProjectDTO> createProjectDtoValidator;
+        readonly IValidator<UpdateProjectDTO> updateProjectDtoValidator;
+
+        IProjectService SUT;
 
         public ProjectServiceTests()
         {
+            publicProjectOwner = new("Pubfirstname", "Lastname", "email@email.com", "123123Abc") { Id = Guid.NewGuid() };
+            privateProjectOwner = new("Privfirstname", "Lastname", "email@email.com", "123123Abc") { Id = Guid.NewGuid() };
+
+            publicProject = new Project(publicProjectOwner.Id, "PublicProject", isPublic: true) { Id = Guid.NewGuid() };
+            privateProject = new Project(privateProjectOwner.Id, "PrivateProject", isPublic: false) { Id = Guid.NewGuid() };
+
+            fakeProjectRepo = new FakeProjectRepository(new() { publicProject, privateProject });
+            fakeUserRepo = new FakeUserRepository(new() { publicProjectOwner, privateProjectOwner });
+
             createProjectDtoValidator = new CreateProjectDTOValidator();
             updateProjectDtoValidator = new UpdateProjectDTOValidator();
+
+            SUT = new ProjectService(fakeProjectRepo, fakeUserRepo, createProjectDtoValidator, updateProjectDtoValidator);
         }
 
         [Fact]
         public async Task AnonymousUsers_DoNotSee_PrivateProjects()
-        {
-            // Arrange:
-            List<Project> projects = new List<Project>
-            {
-                new Project(Guid.NewGuid(), "PubProject", isPublic: true),
-                new Project(Guid.NewGuid(), "PrivateProject", isPublic: false),
-            };
-            IProjectRepository fakeRepo = new FakeProjectRepository(projects);
-            IProjectService service = new ProjectService(
-                fakeRepo,
-                createProjectDtoValidator,
-                updateProjectDtoValidator);
-
+        {            
             // Act:
-            IEnumerable<Project> result = await service.List();
+            IEnumerable<Project> result = await SUT.List();
 
             // Assert:
-            Assert.DoesNotContain(projects[1], result);
-            Assert.Contains(result, p => p.Title == "PubProject");
+            Assert.Contains(publicProject, result);
+            Assert.DoesNotContain(privateProject, result);            
         }
 
         [Fact]
         public async Task RegisteredUsers_CanSee_PrivateProjects()
         {
-            // Arrange:
-            Guid userId = Guid.NewGuid();
-            List<Project> projects = new List<Project>
-            {
-                new Project(userId, "UserProject", isPublic: false),
-                new Project(Guid.NewGuid(), "PubProject", isPublic: true),
-                new Project(Guid.NewGuid(), "PrivateProject", isPublic: false),
-            };
-            IProjectRepository fakeRepo = new FakeProjectRepository(projects);
-            IProjectService service = new ProjectService(
-                fakeRepo,
-                createProjectDtoValidator,
-                updateProjectDtoValidator);
-
             // Act:
-            IEnumerable<Project> result = await service.List(userId);
+            IEnumerable<Project> result = await SUT.List(privateProjectOwner.Id);
 
             // Assert:
-            Assert.Contains(result, p => p.Title == "UserProject");
-            Assert.DoesNotContain(projects[2], result);
+            Assert.Contains(privateProject, result);
         }
 
         [Fact]
         public async Task Create_Throws_ValidationException()
         {
             // Arrange:
-            CreateProjectDTO dto = new(Guid.NewGuid(), "A");
-            IProjectRepository fakeRepo = new FakeProjectRepository(new List<Project>());
-            IProjectService service = new ProjectService(
-                fakeRepo,
-                createProjectDtoValidator,
-                updateProjectDtoValidator);
+            CreateProjectDTO dto = new(Guid.NewGuid(), "A");          
 
             // Assert:            
-            await Assert.ThrowsAsync<ValidationException>(() => service.Create(dto));
+            await Assert.ThrowsAsync<ValidationException>(() => SUT.Create(dto));
         }
 
         [Fact]
         public async Task Getting_NonExistentProject_Throws_NotFoundException()
         {
-            // Arrange:            
-            IProjectRepository fakeRepo = new FakeProjectRepository(new List<Project>());
-            IProjectService service = new ProjectService(
-                fakeRepo,
-                createProjectDtoValidator,
-                updateProjectDtoValidator);
-
             // Assert:            
-            await Assert.ThrowsAsync<EntityNotFoundException>(() => service.Get(Guid.NewGuid()));
+            await Assert.ThrowsAsync<EntityNotFoundException>(() => SUT.Get(Guid.NewGuid()));
         }
 
         [Fact]
         public async Task Owner_IsAllowedTo_UpdateProject()
         {
-            // Arrange:
-            Guid ownerId = Guid.NewGuid();
-            Guid projectId = Guid.NewGuid();
-            UpdateProjectDTO dto = new(ownerId, projectId, "NewTitle", "NewDescription", true);
-            IProjectRepository fakeRepo = new FakeProjectRepository(new List<Project>
-            {
-                new Project(ownerId, "OldTitle", isPublic: false) { Id = projectId }
-            });
-            IProjectService service = new ProjectService(
-                fakeRepo,
-                createProjectDtoValidator,
-                updateProjectDtoValidator);
+            // Arrange:           
+            UpdateProjectDTO dto = new(publicProjectOwner.Id, publicProject.Id, "NewTitle", "NewDescription", true);            
 
             // Act:
-            var updatedProject = await service.Update(dto);
+            var updatedProject = await SUT.Update(dto);
 
             // Assert:
             Assert.Equal("NewTitle", updatedProject.Title);
@@ -123,58 +96,35 @@ namespace UnitTests
         [Fact]
         public async Task NotOwner_IsNotAllowedTo_UpdateProject()
         {
-            // Arrange:
-            Guid projectId = Guid.NewGuid();
-            UpdateProjectDTO dto = new(Guid.NewGuid(), projectId, "NewTitle", "NewDescription", true);
-            IProjectRepository fakeRepo = new FakeProjectRepository(new List<Project>
-            {
-                new Project(Guid.NewGuid(), "OldTitle", isPublic: true) { Id = projectId }
-            });
-            IProjectService service = new ProjectService(
-                fakeRepo,
-                createProjectDtoValidator,
-                updateProjectDtoValidator);
-
+            // Arrange:            
+            UpdateProjectDTO dto = new(Guid.NewGuid(), publicProject.Id, "NewTitle", "NewDescription", true);
+            
             // Assert:
-            await Assert.ThrowsAsync<NotAllowedException>(() => service.Update(dto));
+            await Assert.ThrowsAsync<NotAllowedException>(() => SUT.Update(dto));
         }
 
         [Fact]
         public async Task Updating_PrivateProject_Throws_NotFoundException()
         {
-            // Arrange:
-            Guid projectId = Guid.NewGuid();
-            UpdateProjectDTO dto = new(Guid.NewGuid(), projectId, "NewTitle", "NewDescription", true);
-            IProjectRepository fakeRepo = new FakeProjectRepository(new List<Project>
-            {
-                new Project(Guid.NewGuid(), "OldTitle", isPublic: false) { Id = projectId }
-            });
-            IProjectService service = new ProjectService(
-                fakeRepo,
-                createProjectDtoValidator,
-                updateProjectDtoValidator);
+            // Arrange:            
+            UpdateProjectDTO dto = new(Guid.NewGuid(), privateProject.Id, "NewTitle", "NewDescription", true);            
 
             // Assert:
-            await Assert.ThrowsAsync<EntityNotFoundException>(() => service.Update(dto));
+            await Assert.ThrowsAsync<EntityNotFoundException>(() => SUT.Update(dto));
         }
 
         [Fact]
         public async Task NotOwner_IsNotAllowedTo_DeleteProject()
         {
-            // Arrange:
-            Guid collaboratorId = Guid.NewGuid();
-            Guid projectId = Guid.NewGuid();
-            var collaborator = new User("Firstname", "Lastname", "email@email.com", "123123Abc") { Id = collaboratorId };            
-            var project = new Project(Guid.NewGuid(), "Project") { Id = projectId };
-            project.AddCollaborator(collaborator);
-            IProjectRepository fakeRepo = new FakeProjectRepository(new List<Project> { project });
-            IProjectService service = new ProjectService(
-                fakeRepo,
-                createProjectDtoValidator,
-                updateProjectDtoValidator);
-
             // Assert:
-            await Assert.ThrowsAsync<NotAllowedException>(() => service.Delete(collaboratorId, projectId));
+            await Assert.ThrowsAsync<NotAllowedException>(() => SUT.Delete(Guid.NewGuid(), publicProject.Id));
+        }
+
+        [Fact]
+        public async Task Deleting_PrivateProject_Throws_NotFoundException()
+        {
+            // Assert:
+            await Assert.ThrowsAsync<EntityNotFoundException>(() => SUT.Delete(Guid.NewGuid(), privateProject.Id));
         }
     }
 }
