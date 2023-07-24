@@ -9,17 +9,39 @@ namespace ProjectManager.Application.Services;
 public class ProjectService : IProjectService
 {
     private readonly IProjectRepository _projectRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IValidator<CreateProjectDTO> _createProjectDtoValidator;
     private readonly IValidator<UpdateProjectDTO> _updateProjectDtoValidator;
 
     public ProjectService(
         IProjectRepository projectRepository,
+        IUserRepository userRepository,
         IValidator<CreateProjectDTO> createProjectDtoValidator,
         IValidator<UpdateProjectDTO> updateProjectDtoValidator)
     {
         _projectRepository = projectRepository;
+        _userRepository = userRepository;
         _createProjectDtoValidator = createProjectDtoValidator;
         _updateProjectDtoValidator = updateProjectDtoValidator;
+    }
+
+    public async Task AddCollaborator(AddRemoveCollaboratorDTO dto)
+    {
+        var project = await _projectRepository.GetById(dto.ProjectId) ?? throw new EntityNotFoundException("Project not found.");
+        var collaborator = await _userRepository.GetById(dto.CollaboratorId) ?? throw new EntityNotFoundException("User not found.");
+
+        if (project.OwnerId != dto.ActorId)
+        {
+            switch (project.IsPublic || project.Collaborators.Any(c => c.Id == dto.ActorId))
+            {
+                case true:
+                    throw new NotAllowedException();
+                case false:
+                    throw new EntityNotFoundException();
+            }
+        }
+
+        project.AddCollaborator(collaborator);
     }
 
     public async Task<Project> Create(CreateProjectDTO dto)

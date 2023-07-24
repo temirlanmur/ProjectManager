@@ -23,6 +23,11 @@ public class Project
         IsPublic = isPublic;
     }
 
+    /// <summary>
+    /// Adds collaborator to the project.
+    /// </summary>
+    /// <param name="collaborator"></param>
+    /// <exception cref="AlreadyCollaboratorException"></exception>
     public void AddCollaborator(User collaborator)
     {
         if (Collaborators.Any(c => c.Id == collaborator.Id))

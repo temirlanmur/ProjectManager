@@ -40,4 +40,11 @@ public interface IProjectService
     /// <param name="projectId"></param>
     /// <returns></returns>
     Task Delete(Guid actorId, Guid projectId);
+
+    /// <summary>
+    /// Adds collaborator to the project.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    Task AddCollaborator(AddRemoveCollaboratorDTO dto);
 }
