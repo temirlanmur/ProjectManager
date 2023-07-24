@@ -157,5 +157,24 @@ namespace UnitTests
             // Assert:
             await Assert.ThrowsAsync<EntityNotFoundException>(() => service.Update(dto));
         }
+
+        [Fact]
+        public async Task NotOwner_IsNotAllowedTo_DeleteProject()
+        {
+            // Arrange:
+            Guid collaboratorId = Guid.NewGuid();
+            Guid projectId = Guid.NewGuid();
+            var collaborator = new User("Firstname", "Lastname", "email@email.com", "123123Abc") { Id = collaboratorId };            
+            var project = new Project(Guid.NewGuid(), "Project") { Id = projectId };
+            project.AddCollaborator(collaborator);
+            IProjectRepository fakeRepo = new FakeProjectRepository(new List<Project> { project });
+            IProjectService service = new ProjectService(
+                fakeRepo,
+                createProjectDtoValidator,
+                updateProjectDtoValidator);
+
+            // Assert:
+            await Assert.ThrowsAsync<NotAllowedException>(() => service.Delete(collaboratorId, projectId));
+        }
     }
 }

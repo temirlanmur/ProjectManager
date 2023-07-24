@@ -1,4 +1,6 @@
-﻿namespace ProjectManager.Domain.Entities;
+﻿using ProjectManager.Domain.Exceptions;
+
+namespace ProjectManager.Domain.Entities;
 
 public class Project
 {
@@ -6,10 +8,12 @@ public class Project
     public Guid OwnerId { get; private set; }
     public string Title { get; set; }
     public string Description { get; set; }
-    public bool IsPublic { get; set; }    
+    public bool IsPublic { get; set; }
 
     public User Owner { get; private set; }
-    public IReadOnlyCollection<User> Collaborators { get; private set; } = new List<User>();
+
+    private List<User> _collaborators = new();
+    public IReadOnlyCollection<User> Collaborators => _collaborators.ToList();
 
     public Project(Guid ownerId, string title, string description = "", bool isPublic = false)
     {
@@ -17,5 +21,15 @@ public class Project
         Title = title;
         Description = description;
         IsPublic = isPublic;
+    }
+
+    public void AddCollaborator(User collaborator)
+    {
+        if (Collaborators.Any(c => c.Id == collaborator.Id))
+        {
+            throw new AlreadyCollaboratorException();
+        }
+
+        _collaborators.Add(collaborator);
     }
 }

@@ -12,6 +12,11 @@ public class FakeProjectRepository : IProjectRepository
         _projects = projects;
     }
 
+    public async Task Delete(Guid projectId)
+    {
+        _projects.Remove(_projects.First(p => p.Id == projectId));
+    }
+
     public async Task<Project?> GetById(Guid projectId)
     {
         return _projects.FirstOrDefault(p => p.Id == projectId);
