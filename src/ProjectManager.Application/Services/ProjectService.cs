@@ -31,14 +31,27 @@ public class ProjectService : IProjectService
         return await _projectRepository.Save(project);
     }
 
+    public async Task Delete(Guid actorId, Guid projectId)
+    {
+        var project = await _projectRepository.GetById(projectId) ?? throw new EntityNotFoundException();
+
+        if (project.OwnerId != actorId)
+        {
+            switch (project.IsPublic || project.Collaborators.Any(c => c.Id == actorId))
+            {
+                case true:
+                    throw new NotAllowedException();
+                case false:
+                    throw new EntityNotFoundException();
+            }
+        }
+
+        await _projectRepository.Delete(projectId);
+    }
+
     public async Task<Project> Get(Guid projectId)
     {
-        var project = await _projectRepository.GetByIdWithTasksAndComments(projectId);
-
-        if (project is null)
-        {
-            throw new EntityNotFoundException();
-        }
+        var project = await _projectRepository.GetByIdWithTasksAndComments(projectId) ?? throw new EntityNotFoundException();
 
         return project;
     }
@@ -57,12 +70,7 @@ public class ProjectService : IProjectService
     {
         await _updateProjectDtoValidator.ValidateAndThrowAsync(dto);
 
-        var project = await _projectRepository.GetById(dto.ProjectId);
-
-        if (project is null)
-        {
-            throw new EntityNotFoundException();
-        }
+        var project = await _projectRepository.GetById(dto.ProjectId) ?? throw new EntityNotFoundException();
 
         if (project.OwnerId != dto.ActorId)
         {

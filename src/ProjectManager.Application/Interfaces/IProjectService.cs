@@ -32,4 +32,12 @@ public interface IProjectService
     /// <param name="dto"></param>
     /// <returns></returns>
     Task<Project> Update(UpdateProjectDTO dto);
+
+    /// <summary>
+    /// Deletes project.
+    /// </summary>
+    /// <param name="actorId">ID of the user who makes the request to delete.</param>
+    /// <param name="projectId"></param>
+    /// <returns></returns>
+    Task Delete(Guid actorId, Guid projectId);
 }
