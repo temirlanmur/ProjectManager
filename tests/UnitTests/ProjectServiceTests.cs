@@ -150,5 +150,31 @@ namespace UnitTests
             // Assert:
             await Assert.ThrowsAsync<AlreadyCollaboratorException>(() => SUT.AddCollaborator(dto));
         }
+
+        [Fact]
+        public async Task Owner_IsAllowedTo_RemoveCollaborator()
+        {
+            // Arrange:
+            User collaborator = new("Collaborator", "Lastname", "email@email.com", "123123Abc") { Id = Guid.NewGuid() };
+            ((FakeUserRepository)fakeUserRepo).supplyUser(collaborator);
+            publicProject.AddCollaborator(collaborator);
+            AddRemoveCollaboratorDTO dto = new(publicProjectOwner.Id, publicProject.Id, collaborator.Id);
+
+            // Act:
+            await SUT.RemoveCollaborator(dto);
+
+            // Assert:
+            Assert.True(publicProject.Collaborators.Count == 0);
+        }
+
+        [Fact]
+        public async Task Removing_Collaborator_Throws_CollaboratorNotFoundException()
+        {
+            // Arrange:
+            AddRemoveCollaboratorDTO dto = new(publicProjectOwner.Id, publicProject.Id, Guid.NewGuid());
+
+            // Assert:
+            await Assert.ThrowsAsync<CollaboratorNotFoundException>(() => SUT.RemoveCollaborator(dto));
+        }
     }
 }

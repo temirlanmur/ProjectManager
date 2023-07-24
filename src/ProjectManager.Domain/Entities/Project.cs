@@ -37,4 +37,11 @@ public class Project
 
         _collaborators.Add(collaborator);
     }
+
+    public void RemoveCollaborator(Guid collaboratorId)
+    {
+        var collaborator = Collaborators.FirstOrDefault(c => c.Id == collaboratorId) ?? throw new CollaboratorNotFoundException();
+
+        _collaborators.Remove(collaborator);
+    }
 }

@@ -88,6 +88,24 @@ public class ProjectService : IProjectService
         return await _projectRepository.ListForUser(userId.Value);
     }
 
+    public async Task RemoveCollaborator(AddRemoveCollaboratorDTO dto)
+    {
+        var project = await _projectRepository.GetById(dto.ProjectId) ?? throw new EntityNotFoundException();
+
+        if (project.OwnerId != dto.ActorId)
+        {
+            switch (project.IsPublic || project.Collaborators.Any(c => c.Id == dto.ActorId))
+            {
+                case true:
+                    throw new NotAllowedException();
+                case false:
+                    throw new EntityNotFoundException();
+            }
+        }
+
+        project.RemoveCollaborator(dto.CollaboratorId);
+    }
+
     public async Task<Project> Update(UpdateProjectDTO dto)
     {
         await _updateProjectDtoValidator.ValidateAndThrowAsync(dto);
