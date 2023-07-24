@@ -5,11 +5,16 @@ namespace UnitTests.FakeRepositories;
 
 public class FakeProjectRepository : IProjectRepository
 {
-    private List<Project> _projects;
+    readonly List<Project> _projects;
 
     public FakeProjectRepository(List<Project> projects)
     {
         _projects = projects;
+    }
+
+    internal void supplyProject(Project project)
+    {
+        _projects.Add(project);
     }
 
     public async Task Delete(Guid projectId)

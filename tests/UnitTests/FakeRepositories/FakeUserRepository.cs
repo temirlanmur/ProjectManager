@@ -5,11 +5,16 @@ namespace UnitTests.FakeRepositories;
 
 public class FakeUserRepository : IUserRepository
 {
-    private List<User> _users;
+    readonly List<User> _users;
 
     public FakeUserRepository(List<User> users)
     {
         _users = users;
+    }
+
+    internal void supplyUser(User user)
+    {
+        _users.Add(user);
     }
 
     public async Task<User?> GetById(Guid userId)

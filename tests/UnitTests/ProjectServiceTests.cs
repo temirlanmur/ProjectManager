@@ -5,6 +5,7 @@ using ProjectManager.Application.Interfaces;
 using ProjectManager.Application.Services;
 using ProjectManager.Application.Validators;
 using ProjectManager.Domain.Entities;
+using ProjectManager.Domain.Exceptions;
 using UnitTests.FakeRepositories;
 
 namespace UnitTests
@@ -27,8 +28,8 @@ namespace UnitTests
 
         public ProjectServiceTests()
         {
-            publicProjectOwner = new("Pubfirstname", "Lastname", "email@email.com", "123123Abc") { Id = Guid.NewGuid() };
-            privateProjectOwner = new("Privfirstname", "Lastname", "email@email.com", "123123Abc") { Id = Guid.NewGuid() };
+            publicProjectOwner = new User("Pubfirstname", "Lastname", "email@email.com", "123123Abc") { Id = Guid.NewGuid() };
+            privateProjectOwner = new User("Privfirstname", "Lastname", "email@email.com", "123123Abc") { Id = Guid.NewGuid() };
 
             publicProject = new Project(publicProjectOwner.Id, "PublicProject", isPublic: true) { Id = Guid.NewGuid() };
             privateProject = new Project(privateProjectOwner.Id, "PrivateProject", isPublic: false) { Id = Guid.NewGuid() };
@@ -125,6 +126,29 @@ namespace UnitTests
         {
             // Assert:
             await Assert.ThrowsAsync<EntityNotFoundException>(() => SUT.Delete(Guid.NewGuid(), privateProject.Id));
+        }
+
+        [Fact]
+        public async Task NotOwner_IsNotAllowedTo_AddCollaborator()
+        {
+            // Arrange:
+            AddRemoveCollaboratorDTO dto = new(Guid.NewGuid(), publicProject.Id, privateProjectOwner.Id);
+
+            // Assert:
+            await Assert.ThrowsAsync<NotAllowedException>(() => SUT.AddCollaborator(dto));
+        }
+
+        [Fact]
+        public async Task Adding_AlreadyCollaborator_Throws_AlreadyCollaboratorException()
+        {
+            // Arrange:
+            User collaborator = new("Collaborator", "Lastname", "email@email.com", "123123Abc") { Id = Guid.NewGuid() };
+            ((FakeUserRepository)fakeUserRepo).supplyUser(collaborator);            
+            publicProject.AddCollaborator(collaborator);
+            AddRemoveCollaboratorDTO dto = new(publicProjectOwner.Id, publicProject.Id, collaborator.Id);
+
+            // Assert:
+            await Assert.ThrowsAsync<AlreadyCollaboratorException>(() => SUT.AddCollaborator(dto));
         }
     }
 }
