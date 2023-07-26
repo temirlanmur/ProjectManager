@@ -15,6 +15,9 @@ public class Project
     private List<User> _collaborators = new();
     public IReadOnlyCollection<User> Collaborators => _collaborators.ToList();
 
+    private List<ProjectTask> _tasks = new();
+    public IReadOnlyCollection<ProjectTask> Tasks => _tasks.ToList();
+
     public Project(Guid ownerId, string title, string description = "", bool isPublic = false)
     {
         OwnerId = ownerId;
