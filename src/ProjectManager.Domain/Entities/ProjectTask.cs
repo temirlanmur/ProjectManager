@@ -2,7 +2,7 @@
 
 public class ProjectTask
 {
-    public Guid Id { get; init; }
+    public Guid Id { get; private set; }
     public Guid ProjectId { get; private set; }
     public Guid AuthorId { get; private set; }
     public string Title { get; set; }

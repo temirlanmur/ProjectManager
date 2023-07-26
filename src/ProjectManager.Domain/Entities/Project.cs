@@ -4,7 +4,7 @@ namespace ProjectManager.Domain.Entities;
 
 public class Project
 {
-    public Guid Id { get; init; }
+    public Guid Id { get; private set; }
     public Guid OwnerId { get; private set; }
     public string Title { get; set; }
     public string Description { get; set; }

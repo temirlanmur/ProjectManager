@@ -5,20 +5,15 @@ namespace UnitTests.FakeRepositories;
 
 public class FakeUserRepository : IUserRepository
 {
-    readonly List<User> _users;
+    readonly DataDictionary _data;
 
-    public FakeUserRepository(List<User> users)
+    public FakeUserRepository(DataDictionary data)
     {
-        _users = users;
-    }
-
-    internal void supplyUser(User user)
-    {
-        _users.Add(user);
+        _data = data;
     }
 
     public async Task<User?> GetById(Guid userId)
     {
-        return _users.FirstOrDefault(u => u.Id == userId);
+        return _data.Users.FirstOrDefault(u => u.Id == userId);
     }
 }

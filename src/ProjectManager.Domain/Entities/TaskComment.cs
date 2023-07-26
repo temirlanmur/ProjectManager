@@ -2,7 +2,7 @@
 
 public class TaskComment
 {
-    public Guid Id { get; init; }
+    public Guid Id { get; private set; }
     public Guid AuthorId { get; private set; }
     public string Text { get; set; }
 
