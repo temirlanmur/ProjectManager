@@ -8,9 +8,9 @@ public interface IProjectService
     /// <summary>
     /// Lists projects available to user.
     /// </summary>
-    /// <param name="userId">Authenticated user's ID, or null, if the user is unauthenticated.</param>
+    /// <param name="actorId">Authenticated user's ID, or null, if the user is unauthenticated.</param>
     /// <returns></returns>
-    Task<IEnumerable<Project>> List(Guid? userId = null);
+    Task<IEnumerable<Project>> List(Guid? actorId = null);
     
     /// <summary>
     /// Creates new project.
@@ -22,9 +22,10 @@ public interface IProjectService
     /// <summary>
     /// Gets project by its ID.
     /// </summary>
+    /// <param name="actorId">Authenticated user's ID, or null, if the user is unauthenticated.</param>
     /// <param name="projectId"></param>
     /// <returns></returns>
-    Task<Project> Get(Guid projectId);
+    Task<Project> Get(Guid? actorId, Guid projectId);
 
     /// <summary>
     /// Updates project.

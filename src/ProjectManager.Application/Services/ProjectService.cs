@@ -71,21 +71,36 @@ public class ProjectService : IProjectService
         await _projectRepository.Delete(projectId);
     }
 
-    public async Task<Project> Get(Guid projectId)
+    public async Task<Project> Get(Guid? actorId, Guid projectId)
     {
         var project = await _projectRepository.GetByIdWithTasksAndComments(projectId) ?? throw new EntityNotFoundException();
 
-        return project;
+        if (project.IsPublic)
+        {
+            return project;
+        }
+
+        if (actorId is null)
+        {
+            throw new EntityNotFoundException();
+        }
+
+        if (project.OwnerId == actorId || project.Collaborators.Any(c => c.Id == actorId))
+        {
+            return project;
+        }
+
+        throw new EntityNotFoundException();
     }
 
-    public async Task<IEnumerable<Project>> List(Guid? userId = null)
+    public async Task<IEnumerable<Project>> List(Guid? actorId = null)
     {
-        if (userId is null)
+        if (actorId is null)
         {
             return await _projectRepository.ListPublic();
         }
 
-        return await _projectRepository.ListForUser(userId.Value);
+        return await _projectRepository.ListForUser(actorId.Value);
     }
 
     public async Task RemoveCollaborator(AddRemoveCollaboratorDTO dto)
