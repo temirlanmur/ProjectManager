@@ -27,21 +27,21 @@ public class ProjectService : IProjectService
 
     public async Task AddCollaborator(AddRemoveCollaboratorDTO dto)
     {
-        var project = await _projectRepository.GetById(dto.ProjectId) ?? throw new EntityNotFoundException("Project not found.");
-        var collaborator = await _userRepository.GetById(dto.CollaboratorId) ?? throw new EntityNotFoundException("User not found.");
+        var project = await _projectRepository.GetById(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
+        var collaborator = await _userRepository.GetById(dto.CollaboratorId) ?? throw EntityNotFoundException.ForEntity(typeof(User));
 
-        if (project.OwnerId != dto.ActorId)
+        if (project.OwnerId == dto.ActorId)
         {
-            switch (project.IsPublic || project.Collaborators.Any(c => c.Id == dto.ActorId))
-            {
-                case true:
-                    throw new NotAllowedException();
-                case false:
-                    throw new EntityNotFoundException();
-            }
+            project.AddCollaborator(collaborator);
+            return;            
         }
 
-        project.AddCollaborator(collaborator);
+        if (project.IsPublic || project.Collaborators.Any(c => c.Id == dto.ActorId))
+        {
+            throw new NotAllowedException();
+        }
+
+        throw EntityNotFoundException.ForEntity(typeof(Project));
     }
 
     public async Task<Project> Create(CreateProjectDTO dto)
@@ -55,25 +55,25 @@ public class ProjectService : IProjectService
 
     public async Task Delete(Guid actorId, Guid projectId)
     {
-        var project = await _projectRepository.GetById(projectId) ?? throw new EntityNotFoundException();
+        var project = await _projectRepository.GetById(projectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
-        if (project.OwnerId != actorId)
+        if (project.OwnerId == actorId)
         {
-            switch (project.IsPublic || project.Collaborators.Any(c => c.Id == actorId))
-            {
-                case true:
-                    throw new NotAllowedException();
-                case false:
-                    throw new EntityNotFoundException();
-            }
+            await _projectRepository.Delete(projectId);
+            return;
         }
 
-        await _projectRepository.Delete(projectId);
+        if (project.IsPublic || project.Collaborators.Any(c => c.Id == actorId))
+        {
+            throw new NotAllowedException();
+        }
+        
+        throw EntityNotFoundException.ForEntity(typeof(Project));        
     }
 
     public async Task<Project> Get(Guid? actorId, Guid projectId)
     {
-        var project = await _projectRepository.GetByIdWithTasksAndComments(projectId) ?? throw new EntityNotFoundException();
+        var project = await _projectRepository.GetByIdWithTasksAndComments(projectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
         if (project.IsPublic)
         {
@@ -82,7 +82,7 @@ public class ProjectService : IProjectService
 
         if (actorId is null)
         {
-            throw new EntityNotFoundException();
+            throw EntityNotFoundException.ForEntity(typeof(Project));
         }
 
         if (project.OwnerId == actorId || project.Collaborators.Any(c => c.Id == actorId))
@@ -90,7 +90,7 @@ public class ProjectService : IProjectService
             return project;
         }
 
-        throw new EntityNotFoundException();
+        throw EntityNotFoundException.ForEntity(typeof(Project));
     }
 
     public async Task<IEnumerable<Project>> List(Guid? actorId = null)
@@ -105,43 +105,42 @@ public class ProjectService : IProjectService
 
     public async Task RemoveCollaborator(AddRemoveCollaboratorDTO dto)
     {
-        var project = await _projectRepository.GetById(dto.ProjectId) ?? throw new EntityNotFoundException();
-
-        if (project.OwnerId != dto.ActorId)
+        var project = await _projectRepository.GetById(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
+        
+        if (project.OwnerId == dto.ActorId)
         {
-            switch (project.IsPublic || project.Collaborators.Any(c => c.Id == dto.ActorId))
-            {
-                case true:
-                    throw new NotAllowedException();
-                case false:
-                    throw new EntityNotFoundException();
-            }
+            project.RemoveCollaborator(dto.CollaboratorId);
+            return;            
         }
 
-        project.RemoveCollaborator(dto.CollaboratorId);
+        if (project.IsPublic || project.Collaborators.Any(c => c.Id == dto.ActorId))
+        {
+            throw new NotAllowedException();
+        }
+
+        throw EntityNotFoundException.ForEntity(typeof(Project));
     }
 
     public async Task<Project> Update(UpdateProjectDTO dto)
     {
         await _updateProjectDtoValidator.ValidateAndThrowAsync(dto);
+        
+        var project = await _projectRepository.GetById(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
-        var project = await _projectRepository.GetById(dto.ProjectId) ?? throw new EntityNotFoundException();
-
-        if (project.OwnerId != dto.ActorId)
+        if (project.OwnerId == dto.ActorId)
         {
-            switch (project.IsPublic || project.Collaborators.Any(c => c.Id == dto.ActorId))
-            {
-                case true:
-                    throw new NotAllowedException();
-                case false:
-                    throw new EntityNotFoundException();
-            }
+            project.Title = dto.Title;
+            project.Description = dto.Description;
+            project.IsPublic = dto.IsPublic;
+
+            return await _projectRepository.Save(project);            
         }
 
-        project.Title = dto.Title;
-        project.Description = dto.Description;
-        project.IsPublic = dto.IsPublic;
+        if (project.IsPublic || project.Collaborators.Any(c => c.Id == dto.ActorId))
+        {
+            throw new NotAllowedException();
+        }
 
-        return await _projectRepository.Save(project);
+        throw EntityNotFoundException.ForEntity(typeof(Project));
     }
 }
