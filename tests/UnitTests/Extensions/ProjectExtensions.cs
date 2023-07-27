@@ -1,6 +1,5 @@
 ﻿using ProjectManager.Domain.Entities;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace UnitTests.Extensions;
 
@@ -23,7 +22,7 @@ internal static class ProjectExtensions
     {
         var projectTasksField = project
             .GetType()
-            .GetField("_tasks", BindingFlags.NonPublic & BindingFlags.Instance)
+            .GetField("_tasks", BindingFlags.NonPublic | BindingFlags.Instance)
             ?? throw new Exception(ConfigurationExceptionMessage);
         projectTasksField.SetValue(project, tasks);
 
