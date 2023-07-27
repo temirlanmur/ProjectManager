@@ -30,53 +30,51 @@ public class TaskService : ITaskService
     {
         await _createTaskDtoValidator.ValidateAndThrowAsync(dto);
 
-        var project = await _projectRepository.GetById(dto.ProjectId) ?? throw new EntityNotFoundException();
+        var project = await _projectRepository.GetById(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
         if (project.OwnerId == dto.ActorId || project.Collaborators.Any(c => c.Id == dto.ActorId))
         {
             ProjectTask task = new(dto.ProjectId, dto.ActorId, dto.Title, dto.Description);
             return await _taskRepository.Save(task);
         }
-        else if (project.IsPublic)
+        
+        if (project.IsPublic)
         {
             throw new NotAllowedException();
         }
-        else
-        {
-            throw new EntityNotFoundException();
-        }
+
+        throw EntityNotFoundException.ForEntity(typeof(Project));
     }
 
     public async Task<ProjectTask> Update(UpdateTaskDTO dto)
     {
         await _updateTaskDtoValidator.ValidateAndThrowAsync(dto);
 
-        var project = await _projectRepository.GetByIdWithTasks(dto.ProjectId) ?? throw new EntityNotFoundException("Project not found.");
+        var project = await _projectRepository.GetByIdWithTasks(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));        
 
         bool isProjectOwner = project.OwnerId == dto.ActorId;
         bool isCollaborator = project.Collaborators.Any(c => c.Id == dto.ActorId);
 
-        if (!isProjectOwner && !isCollaborator)
+        if (isProjectOwner || isCollaborator)
         {
-            switch (project.IsPublic)
+            var task = project.Tasks.FirstOrDefault(t => t.Id == dto.TaskId) ?? throw EntityNotFoundException.ForEntity(typeof(ProjectTask));
+
+            if (isProjectOwner || (isCollaborator && task.AuthorId == dto.ActorId))
             {
-                case true:
-                    throw new NotAllowedException();
-                case false:
-                    throw new EntityNotFoundException("Project not found.");
+                task.Title = dto.Title;
+                task.Description = dto.Description;
+
+                return await _taskRepository.Save(task);
             }
+
+            throw new NotAllowedException();
         }
 
-        var task = project.Tasks.FirstOrDefault(t => t.Id == dto.TaskId) ?? throw new EntityNotFoundException("Task not found.");        
-
-        if (isProjectOwner || task.AuthorId == dto.ActorId)
+        if (project.IsPublic)
         {
-            task.Title = dto.Title;
-            task.Description = dto.Description;
-
-            await _taskRepository.Save(task);
+            throw new NotAllowedException();
         }
-        
-        throw new NotAllowedException();        
+
+        throw EntityNotFoundException.ForEntity(typeof(Project));
     }
 }

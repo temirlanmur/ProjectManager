@@ -4,4 +4,4 @@ public record CreateTaskDTO(
     Guid ActorId,
     Guid ProjectId,
     string Title,
-    string Description);
+    string Description = "");
