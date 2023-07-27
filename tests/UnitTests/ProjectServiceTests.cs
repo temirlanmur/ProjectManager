@@ -13,10 +13,10 @@ namespace UnitTests
 {
     public class ProjectServiceTests
     {
-        readonly DataDictionary _dataDictionary;        
+        readonly DataDictionary _dataDictionary;
 
         readonly IProjectRepository _fakeProjectRepo;
-        readonly IUserRepository _fakeUserRepo;        
+        readonly IUserRepository _fakeUserRepo;
 
         readonly IValidator<CreateProjectDTO> _createProjectDtoValidator;
         readonly IValidator<UpdateProjectDTO> _updateProjectDtoValidator;
@@ -37,9 +37,9 @@ namespace UnitTests
             }                       
 
             _dataDictionary = new(
-                new() { privateProjectOwner, publicProjectOwner, publicProjectCollaborator },
-                new() { privateProject, publicProject },
-                new() { } );
+                new List<User> { privateProjectOwner, publicProjectOwner, publicProjectCollaborator },
+                new List<Project> { privateProject, publicProject },
+                new List<ProjectTask> { } );
 
             _fakeProjectRepo = new FakeProjectRepository(_dataDictionary);
             _fakeUserRepo = new FakeUserRepository(_dataDictionary);
@@ -98,7 +98,7 @@ namespace UnitTests
         }
 
         [Fact]
-        public async Task User_CanCreate_Project()
+        public async Task User_Can_CreateProject()
         {
             // Arrange:
             User user = _dataDictionary.Users.First(u => u.FirstName == "PublicProjectOwner");
@@ -108,9 +108,10 @@ namespace UnitTests
             Project newProject = await SUT.Create(dto);
 
             // Assert:
-            IEnumerable<Guid> projectIds = (await SUT.List(user.Id)).Select(p => p.Id);
-            Assert.Contains(newProject.Id, projectIds);
-            Assert.Equal(user.Id, newProject.OwnerId);
+            Project created = _dataDictionary.Projects.First(p => p.Title == "New Project");
+            Assert.Equal(newProject.Id, created.Id);
+            Assert.Equal(user.Id, created.OwnerId);
+            Assert.Equal("New Project", created.Title);
         }
 
         [Fact]
@@ -142,7 +143,7 @@ namespace UnitTests
         }
 
         [Fact]
-        public async Task ProjectOwner_CanGet_PrivateProject()
+        public async Task ProjectOwner_Can_GetPrivateProject()
         {
             // Arrange:
             User privateProjectOwner = _dataDictionary.Users.First(u => u.FirstName == "PrivateProjectOwner");
@@ -165,7 +166,7 @@ namespace UnitTests
             UpdateProjectDTO dto = new(projectOwner.Id, project.Id, "NewTitle", "NewDescription", false);            
 
             // Act:
-            var updatedProject = await SUT.Update(dto);
+            Project updatedProject = await SUT.Update(dto);
 
             // Assert:
             Assert.Equal("NewTitle", updatedProject.Title);
@@ -206,7 +207,7 @@ namespace UnitTests
             await SUT.Delete(projectOwner.Id, project.Id);
 
             // Assert:
-            IEnumerable<Guid> projectIds = (await SUT.List(projectOwner.Id)).Select(p => p.Id);
+            IEnumerable<Guid> projectIds = _dataDictionary.Projects.Select(p => p.Id);
             Assert.DoesNotContain(project.Id, projectIds);
         }
 
@@ -244,7 +245,7 @@ namespace UnitTests
         }
 
         [Fact]
-        public async Task ProjectOwner_CanRemove_Collaborator()
+        public async Task ProjectOwner_Can_RemoveCollaborator()
         {
             // Arrange:
             User projectOwner = _dataDictionary.Users.First(u => u.FirstName == "PublicProjectOwner");
@@ -262,7 +263,7 @@ namespace UnitTests
         }
 
         [Fact]
-        public async Task Removing_Collaborator_Throws_CollaboratorNotFoundException()
+        public async Task Removing_NonExistentCollaborator_Throws_CollaboratorNotFoundException()
         {
             // Arrange:
             User projectOwner = _dataDictionary.Users.First(u => u.FirstName == "PublicProjectOwner");
