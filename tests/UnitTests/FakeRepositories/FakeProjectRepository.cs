@@ -25,7 +25,22 @@ public class FakeProjectRepository : IProjectRepository
 
     public async Task<Project?> GetByIdWithTasksAndComments(Guid projectId)
     {
-        return _data.Projects.FirstOrDefault(p => p.Id == projectId);
+        var project = _data.Projects.FirstOrDefault(p => p.Id == projectId);
+
+        if (project is null)
+        {
+            return project;
+        }
+
+        var tasks = _data.Tasks.Where(t => t.ProjectId == projectId).ToList();
+
+        for (int i = 0; i < tasks.Count; i++)
+        {
+            var comments = _data.TaskComments.Where(c => c.TaskId == tasks[i].Id).ToList();
+            tasks[i] = tasks[i].IncludeComments(comments);
+        }
+
+        return project.IncludeTasks(tasks);
     }
 
     public async Task<IEnumerable<Project>> ListForUser(Guid userId)
