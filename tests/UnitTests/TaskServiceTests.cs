@@ -16,9 +16,13 @@ public class TaskServiceTests
 
     readonly IProjectRepository _fakeProjectRepo;
     readonly ITaskRepository _fakeTaskRepo;
+    readonly ITaskCommentRepository _fakeTaskCommentRepo;
 
     readonly IValidator<CreateTaskDTO> _createTaskDtoValidator;
     readonly IValidator<UpdateTaskDTO> _updateTaskDtoValidator;
+    readonly IValidator<DeleteTaskDTO> _deleteTaskDtoValidator;
+    readonly IValidator<AddTaskCommentDTO> _addTaskCommentDtoValidator;
+    readonly IValidator<DeleteTaskCommentDTO> _deleteTaskCommentDtoValidator;
 
     ITaskService SUT;
 
@@ -39,19 +43,28 @@ public class TaskServiceTests
         _dataDictionary = new(
             new List<User> { projectOwner, collaborator, taskAuthor },
             new List<Project> { project },
-            new List<ProjectTask> { task });
+            new List<ProjectTask> { task },
+            new List<TaskComment> { });
 
         _fakeProjectRepo = new FakeProjectRepository(_dataDictionary);
         _fakeTaskRepo = new FakeTaskRepository(_dataDictionary);
+        _fakeTaskCommentRepo = new FakeTaskCommentRepository(_dataDictionary);
 
         _createTaskDtoValidator = new CreateTaskDTOValidator();
         _updateTaskDtoValidator = new UpdateTaskDTOValidator();
+        _deleteTaskDtoValidator = new DeleteTaskDTOValidator();
+        _addTaskCommentDtoValidator = new AddTaskCommentDTOValidator();
+        _deleteTaskCommentDtoValidator = new DeleteTaskCommentDTOValidator();
 
         SUT = new TaskService(
             _fakeProjectRepo,
             _fakeTaskRepo,
+            _fakeTaskCommentRepo,
             _createTaskDtoValidator,
-            _updateTaskDtoValidator);
+            _updateTaskDtoValidator,
+            _deleteTaskDtoValidator,
+            _addTaskCommentDtoValidator,
+            _deleteTaskCommentDtoValidator);
     }
 
     [Fact]
