@@ -18,4 +18,25 @@ public interface ITaskService
     /// <param name="dto"></param>
     /// <returns></returns>
     Task<ProjectTask> Update(UpdateTaskDTO dto);
+
+    /// <summary>
+    /// Deletes task.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    Task Delete(DeleteTaskDTO dto);
+
+    /// <summary>
+    /// Adds task comment.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    Task<TaskComment> AddComment(AddTaskCommentDTO dto);
+
+    /// <summary>
+    /// Deletes task comment.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    Task DeleteComment(DeleteTaskCommentDTO dto);
 }
