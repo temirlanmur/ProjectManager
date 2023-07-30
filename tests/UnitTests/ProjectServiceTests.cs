@@ -39,7 +39,8 @@ namespace UnitTests
             _dataDictionary = new(
                 new List<User> { privateProjectOwner, publicProjectOwner, publicProjectCollaborator },
                 new List<Project> { privateProject, publicProject },
-                new List<ProjectTask> { } );
+                new List<ProjectTask> { },
+                new List<TaskComment> { });
 
             _fakeProjectRepo = new FakeProjectRepository(_dataDictionary);
             _fakeUserRepo = new FakeUserRepository(_dataDictionary);
