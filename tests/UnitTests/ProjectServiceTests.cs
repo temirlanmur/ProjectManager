@@ -18,10 +18,7 @@ namespace UnitTests
         readonly IProjectRepository _fakeProjectRepo;
         readonly IUserRepository _fakeUserRepo;
 
-        readonly IValidator<CreateProjectDTO> _createProjectDtoValidator;
-        readonly IValidator<UpdateProjectDTO> _updateProjectDtoValidator;
-
-        IProjectService SUT;
+        readonly IProjectService SUT;
 
         public ProjectServiceTests()
         {            
@@ -45,8 +42,8 @@ namespace UnitTests
             _fakeProjectRepo = new FakeProjectRepository(_dataDictionary);
             _fakeUserRepo = new FakeUserRepository(_dataDictionary);
 
-            _createProjectDtoValidator = new CreateProjectDTOValidator();
-            _updateProjectDtoValidator = new UpdateProjectDTOValidator();
+            IValidator<CreateProjectDTO> _createProjectDtoValidator = new CreateProjectDTOValidator();
+            IValidator<UpdateProjectDTO> _updateProjectDtoValidator = new UpdateProjectDTOValidator();
 
             SUT = new ProjectService(_fakeProjectRepo, _fakeUserRepo, _createProjectDtoValidator, _updateProjectDtoValidator);
         }

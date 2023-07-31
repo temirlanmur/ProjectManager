@@ -16,15 +16,9 @@ public class TaskServiceTests
 
     readonly IProjectRepository _fakeProjectRepo;
     readonly ITaskRepository _fakeTaskRepo;
-    readonly ITaskCommentRepository _fakeTaskCommentRepo;
+    readonly ITaskCommentRepository _fakeTaskCommentRepo;    
 
-    readonly IValidator<CreateTaskDTO> _createTaskDtoValidator;
-    readonly IValidator<UpdateTaskDTO> _updateTaskDtoValidator;
-    readonly IValidator<DeleteTaskDTO> _deleteTaskDtoValidator;
-    readonly IValidator<AddTaskCommentDTO> _addTaskCommentDtoValidator;
-    readonly IValidator<DeleteTaskCommentDTO> _deleteTaskCommentDtoValidator;
-
-    ITaskService SUT;
+    readonly ITaskService SUT;
 
     public TaskServiceTests()
     {
@@ -50,11 +44,11 @@ public class TaskServiceTests
         _fakeTaskRepo = new FakeTaskRepository(_dataDictionary);
         _fakeTaskCommentRepo = new FakeTaskCommentRepository(_dataDictionary);
 
-        _createTaskDtoValidator = new CreateTaskDTOValidator();
-        _updateTaskDtoValidator = new UpdateTaskDTOValidator();
-        _deleteTaskDtoValidator = new DeleteTaskDTOValidator();
-        _addTaskCommentDtoValidator = new AddTaskCommentDTOValidator();
-        _deleteTaskCommentDtoValidator = new DeleteTaskCommentDTOValidator();
+        IValidator<CreateTaskDTO> _createTaskDtoValidator = new CreateTaskDTOValidator();
+        IValidator<UpdateTaskDTO> _updateTaskDtoValidator = new UpdateTaskDTOValidator();
+        IValidator<DeleteTaskDTO> _deleteTaskDtoValidator = new DeleteTaskDTOValidator();
+        IValidator<AddTaskCommentDTO> _addTaskCommentDtoValidator = new AddTaskCommentDTOValidator();
+        IValidator<DeleteTaskCommentDTO> _deleteTaskCommentDtoValidator = new DeleteTaskCommentDTOValidator();
 
         SUT = new TaskService(
             _fakeProjectRepo,
