@@ -41,7 +41,7 @@ public class TaskService : ITaskService
     {
         await _addTaskCommentDtoValidator.ValidateAndThrowAsync(dto);
 
-        var project = await _projectRepository.GetById(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
+        var project = await _projectRepository.GetByIdWithTasks(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
         bool isProjectOwner = project.OwnerId == dto.ActorId;
         bool isCollaborator = project.Collaborators.Any(c => c.Id == dto.ActorId);

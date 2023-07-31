@@ -33,12 +33,13 @@ public class TaskServiceTests
         }
         
         ProjectTask task = new ProjectTask(project.Id, taskAuthor.Id, "Task").WithId(Guid.NewGuid());
+        TaskComment taskComment = new TaskComment(task.Id, taskAuthor.Id, "Author comment").WithId(Guid.NewGuid());
 
         _dataDictionary = new(
             new List<User> { projectOwner, collaborator, taskAuthor },
             new List<Project> { project },
             new List<ProjectTask> { task },
-            new List<TaskComment> { });
+            new List<TaskComment> { taskComment });
 
         _fakeProjectRepo = new FakeProjectRepository(_dataDictionary);
         _fakeTaskRepo = new FakeTaskRepository(_dataDictionary);
@@ -84,7 +85,7 @@ public class TaskServiceTests
     public async Task NotCollaborator_Cannot_CreateTask()
     {
         // Arrange:
-        var project = _dataDictionary.Projects.First(p => p.Title == "Project");
+        Project project = _dataDictionary.Projects.First(p => p.Title == "Project");
         CreateTaskDTO dto = new(Guid.NewGuid(), project.Id, "New Task");
 
         // Assert:
@@ -130,11 +131,76 @@ public class TaskServiceTests
     {
         // Arrange:
         Project project = _dataDictionary.Projects.First(p => p.Title == "Project");
-        User taskAuthor = _dataDictionary.Users.First(u => u.FirstName == "ProjectCollaborator");
+        User projectCollaborator = _dataDictionary.Users.First(u => u.FirstName == "ProjectCollaborator");
         ProjectTask task = _dataDictionary.Tasks.First(t => t.Title == "Task");
-        UpdateTaskDTO dto = new(taskAuthor.Id, project.Id, task.Id, "Updated Task", "Description");
+        UpdateTaskDTO dto = new(projectCollaborator.Id, project.Id, task.Id, "Updated Task", "Description");
 
         // Assert:
         await Assert.ThrowsAsync<NotAllowedException>(() => SUT.Update(dto));
+    }
+
+    [Fact]
+    public async Task ProjectOwner_Can_DeleteAnyTask()
+    {
+        // Arrange:
+        Project project = _dataDictionary.Projects.First(p => p.Title == "Project");
+        User projectOwner = _dataDictionary.Users.First(u => u.FirstName == "ProjectOwner");
+        ProjectTask task = _dataDictionary.Tasks.First(t => t.Title == "Task");
+        DeleteTaskDTO dto = new(projectOwner.Id, project.Id, task.Id);
+
+        // Act:
+        await SUT.Delete(dto);
+
+        // Assert:
+        IEnumerable<Guid> projectTaskIds = _dataDictionary.Tasks.Select(t => t.Id);
+        Assert.DoesNotContain(task.Id, projectTaskIds);
+    }
+
+    [Fact]
+    public async Task TaskAuthor_Can_DeleteTheirTasks()
+    {
+        // Arrange:
+        Project project = _dataDictionary.Projects.First(p => p.Title == "Project");
+        User taskAuthor = _dataDictionary.Users.First(u => u.FirstName == "TaskAuthor");
+        ProjectTask task = _dataDictionary.Tasks.First(t => t.Title == "Task");
+        DeleteTaskDTO dto = new(taskAuthor.Id, project.Id, task.Id);
+
+        // Act:
+        await SUT.Delete(dto);
+
+        // Assert:
+        IEnumerable<Guid> projectTaskIds = _dataDictionary.Tasks.Select(t => t.Id);
+        Assert.DoesNotContain(task.Id, projectTaskIds);
+    }
+
+    [Fact]
+    public async Task ProjectCollaborator_Can_AddTaskComment()
+    {
+        // Arrange:
+        Project project = _dataDictionary.Projects.First(p => p.Title == "Project");
+        User projectCollaborator = _dataDictionary.Users.First(u => u.FirstName == "ProjectCollaborator");
+        ProjectTask task = _dataDictionary.Tasks.First(t => t.Title == "Task");
+        AddTaskCommentDTO dto = new(projectCollaborator.Id, project.Id, task.Id, "New comment");
+
+        // Act:
+        await SUT.AddComment(dto);
+
+        // Assert:
+        IEnumerable<TaskComment> taskCommentIds = _dataDictionary.TaskComments.Where(tc => tc.TaskId == task.Id);
+        Assert.Contains(taskCommentIds, tc => tc.Text == "New comment");
+    }
+
+    [Fact]
+    public async Task ProjectCollaborator_Cannot_DeleteAnyTask()
+    {
+        // Arrange:
+        Project project = _dataDictionary.Projects.First(p => p.Title == "Project");
+        User projectCollaborator = _dataDictionary.Users.First(u => u.FirstName == "ProjectCollaborator");
+        ProjectTask task = _dataDictionary.Tasks.First(t => t.Title == "Task");
+        TaskComment comment = _dataDictionary.TaskComments.First(tc => tc.Text == "Author comment");
+        DeleteTaskCommentDTO dto = new(projectCollaborator.Id, project.Id, task.Id, comment.Id);
+
+        // Assert:
+        await Assert.ThrowsAsync<NotAllowedException>(() => SUT.DeleteComment(dto));
     }
 }
