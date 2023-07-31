@@ -28,20 +28,11 @@ public class ProjectService : IProjectService
     public async Task AddCollaborator(AddRemoveCollaboratorDTO dto)
     {
         var project = await _projectRepository.GetById(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
+
+        AuthorizeProjectOwnerRequirement(dto.ActorId, project);
+
         var collaborator = await _userRepository.GetById(dto.CollaboratorId) ?? throw EntityNotFoundException.ForEntity(typeof(User));
-
-        if (project.OwnerId == dto.ActorId)
-        {
-            project.AddCollaborator(collaborator);
-            return;            
-        }
-
-        if (project.IsPublic || project.Collaborators.Any(c => c.Id == dto.ActorId))
-        {
-            throw new NotAllowedException();
-        }
-
-        throw EntityNotFoundException.ForEntity(typeof(Project));
+        project.AddCollaborator(collaborator);
     }
 
     public async Task<Project> Create(CreateProjectDTO dto)
@@ -57,18 +48,9 @@ public class ProjectService : IProjectService
     {
         var project = await _projectRepository.GetById(projectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
-        if (project.OwnerId == actorId)
-        {
-            await _projectRepository.Delete(projectId);
-            return;
-        }
+        AuthorizeProjectOwnerRequirement(actorId, project);
 
-        if (project.IsPublic || project.Collaborators.Any(c => c.Id == actorId))
-        {
-            throw new NotAllowedException();
-        }
-        
-        throw EntityNotFoundException.ForEntity(typeof(Project));        
+        await _projectRepository.Delete(projectId);     
     }
 
     public async Task<Project> Get(Guid? actorId, Guid projectId)
@@ -106,19 +88,10 @@ public class ProjectService : IProjectService
     public async Task RemoveCollaborator(AddRemoveCollaboratorDTO dto)
     {
         var project = await _projectRepository.GetById(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
-        
-        if (project.OwnerId == dto.ActorId)
-        {
-            project.RemoveCollaborator(dto.CollaboratorId);
-            return;            
-        }
 
-        if (project.IsPublic || project.Collaborators.Any(c => c.Id == dto.ActorId))
-        {
-            throw new NotAllowedException();
-        }
+        AuthorizeProjectOwnerRequirement(dto.ActorId, project);
 
-        throw EntityNotFoundException.ForEntity(typeof(Project));
+        project.RemoveCollaborator(dto.CollaboratorId);        
     }
 
     public async Task<Project> Update(UpdateProjectDTO dto)
@@ -127,16 +100,31 @@ public class ProjectService : IProjectService
         
         var project = await _projectRepository.GetById(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
-        if (project.OwnerId == dto.ActorId)
-        {
-            project.Title = dto.Title;
-            project.Description = dto.Description;
-            project.IsPublic = dto.IsPublic;
+        AuthorizeProjectOwnerRequirement(dto.ActorId, project);
 
-            return await _projectRepository.Save(project);            
+        project.Title = dto.Title;
+        project.Description = dto.Description;
+        project.IsPublic = dto.IsPublic;
+        return await _projectRepository.Save(project);
+    }
+
+    /// <summary>
+    /// Checks if the given actor is project owner.
+    /// If so, simply returns.
+    /// Otherwise throws suitable exception.
+    /// </summary>
+    /// <param name="actorId"></param>
+    /// <param name="project"></param>
+    /// <exception cref="NotAllowedException"></exception>
+    /// <exception cref="EntityNotFoundException"></exception>
+    public void AuthorizeProjectOwnerRequirement(Guid actorId, Project project)
+    {
+        if (project.OwnerId == actorId)
+        {
+            return;
         }
 
-        if (project.IsPublic || project.Collaborators.Any(c => c.Id == dto.ActorId))
+        if (project.IsPublic || project.Collaborators.Any(c => c.Id == actorId))
         {
             throw new NotAllowedException();
         }

@@ -1,6 +1,6 @@
 ﻿namespace ProjectManager.Application.DTOs.TaskDTOs;
 
-public record AddTaskCommentDTO(
+public record CreateTaskCommentDTO(
     Guid ActorId,
     Guid ProjectId,
     Guid TaskId,

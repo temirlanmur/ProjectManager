@@ -48,7 +48,7 @@ public class TaskServiceTests
         IValidator<CreateTaskDTO> _createTaskDtoValidator = new CreateTaskDTOValidator();
         IValidator<UpdateTaskDTO> _updateTaskDtoValidator = new UpdateTaskDTOValidator();
         IValidator<DeleteTaskDTO> _deleteTaskDtoValidator = new DeleteTaskDTOValidator();
-        IValidator<AddTaskCommentDTO> _addTaskCommentDtoValidator = new AddTaskCommentDTOValidator();
+        IValidator<CreateTaskCommentDTO> _createTaskCommentDtoValidator = new CreateTaskCommentDTOValidator();
         IValidator<DeleteTaskCommentDTO> _deleteTaskCommentDtoValidator = new DeleteTaskCommentDTOValidator();
 
         SUT = new TaskService(
@@ -58,7 +58,7 @@ public class TaskServiceTests
             _createTaskDtoValidator,
             _updateTaskDtoValidator,
             _deleteTaskDtoValidator,
-            _addTaskCommentDtoValidator,
+            _createTaskCommentDtoValidator,
             _deleteTaskCommentDtoValidator);
     }
 
@@ -180,7 +180,7 @@ public class TaskServiceTests
         Project project = _dataDictionary.Projects.First(p => p.Title == "Project");
         User projectCollaborator = _dataDictionary.Users.First(u => u.FirstName == "ProjectCollaborator");
         ProjectTask task = _dataDictionary.Tasks.First(t => t.Title == "Task");
-        AddTaskCommentDTO dto = new(projectCollaborator.Id, project.Id, task.Id, "New comment");
+        CreateTaskCommentDTO dto = new(projectCollaborator.Id, project.Id, task.Id, "New comment");
 
         // Act:
         await SUT.AddComment(dto);

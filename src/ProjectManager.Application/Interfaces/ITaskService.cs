@@ -31,7 +31,7 @@ public interface ITaskService
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    Task<TaskComment> AddComment(AddTaskCommentDTO dto);
+    Task<TaskComment> AddComment(CreateTaskCommentDTO dto);
 
     /// <summary>
     /// Deletes task comment.

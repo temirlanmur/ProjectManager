@@ -41,6 +41,11 @@ public class Project
         _collaborators.Add(collaborator);
     }
 
+    /// <summary>
+    /// Removes collaborator from the project.
+    /// </summary>
+    /// <param name="collaboratorId"></param>
+    /// <exception cref="CollaboratorNotFoundException"></exception>
     public void RemoveCollaborator(Guid collaboratorId)
     {
         var collaborator = Collaborators.FirstOrDefault(c => c.Id == collaboratorId) ?? throw new CollaboratorNotFoundException();

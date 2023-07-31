@@ -3,9 +3,9 @@ using ProjectManager.Application.DTOs.TaskDTOs;
 
 namespace ProjectManager.Application.Validators;
 
-public class AddTaskCommentDTOValidator : AbstractValidator<AddTaskCommentDTO>
+public class CreateTaskCommentDTOValidator : AbstractValidator<CreateTaskCommentDTO>
 {
-    public AddTaskCommentDTOValidator()
+    public CreateTaskCommentDTOValidator()
     {
         RuleFor(d => d.ActorId).NotEmpty();
         RuleFor(d => d.ProjectId).NotEmpty();
