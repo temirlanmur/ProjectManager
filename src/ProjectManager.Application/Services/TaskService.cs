@@ -11,6 +11,7 @@ public class TaskService : ITaskService
     private readonly IProjectRepository _projectRepository;
     private readonly ITaskRepository _taskRepository;
     private readonly ITaskCommentRepository _taskCommentRepository;
+    private readonly IAuthorizationService _authorizationService;
     private readonly IValidator<CreateTaskDTO> _createTaskDtoValidator;
     private readonly IValidator<UpdateTaskDTO> _updateTaskDtoValidator;
     private readonly IValidator<DeleteTaskDTO> _deleteTaskDtoValidator;
@@ -21,6 +22,7 @@ public class TaskService : ITaskService
         IProjectRepository projectRepository,
         ITaskRepository taskRepository,
         ITaskCommentRepository taskCommentRepository,
+        IAuthorizationService authorizationService,
         IValidator<CreateTaskDTO> createTaskDtoValidator,
         IValidator<UpdateTaskDTO> updateTaskDtoValidator,
         IValidator<DeleteTaskDTO> deleteTaskDtoValidator,
@@ -30,6 +32,7 @@ public class TaskService : ITaskService
         _projectRepository = projectRepository;
         _taskRepository = taskRepository;
         _taskCommentRepository = taskCommentRepository;
+        _authorizationService = authorizationService;
         _createTaskDtoValidator = createTaskDtoValidator;
         _updateTaskDtoValidator = updateTaskDtoValidator;
         _deleteTaskDtoValidator = deleteTaskDtoValidator;
@@ -43,7 +46,7 @@ public class TaskService : ITaskService
 
         var project = await _projectRepository.GetByIdWithTasks(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
-        AuthorizeProjectOwnerOrCollaboratorRequirement(dto.ActorId, project);
+        _authorizationService.AuthorizeProjectOwnerOrCollaboratorRequirement(dto.ActorId, project);
 
         bool isProjectOwner = project.OwnerId == dto.ActorId;
         bool isCollaborator = project.Collaborators.Any(c => c.Id == dto.ActorId);
@@ -60,7 +63,7 @@ public class TaskService : ITaskService
 
         var project = await _projectRepository.GetById(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
-        AuthorizeProjectOwnerOrCollaboratorRequirement(dto.ActorId, project);
+        _authorizationService.AuthorizeProjectOwnerOrCollaboratorRequirement(dto.ActorId, project);
 
         ProjectTask task = new(dto.ProjectId, dto.ActorId, dto.Title, dto.Description);
         return await _taskRepository.Save(task);
@@ -72,7 +75,7 @@ public class TaskService : ITaskService
 
         var project = await _projectRepository.GetByIdWithTasks(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
-        AuthorizeProjectOwnerOrCollaboratorRequirement(dto.ActorId, project);
+        _authorizationService.AuthorizeProjectOwnerOrCollaboratorRequirement(dto.ActorId, project);
 
         bool isProjectOwner = project.OwnerId == dto.ActorId;
         bool isCollaborator = project.Collaborators.Any(c => c.Id == dto.ActorId);
@@ -94,7 +97,7 @@ public class TaskService : ITaskService
 
         var project = await _projectRepository.GetByIdWithTasksAndComments(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
-        AuthorizeProjectOwnerOrCollaboratorRequirement(dto.ActorId, project);
+        _authorizationService.AuthorizeProjectOwnerOrCollaboratorRequirement(dto.ActorId, project);
 
         bool isProjectOwner = project.OwnerId == dto.ActorId;
         bool isCollaborator = project.Collaborators.Any(c => c.Id == dto.ActorId);
@@ -104,7 +107,7 @@ public class TaskService : ITaskService
 
         if (isProjectOwner || (isCollaborator && comment.AuthorId == dto.ActorId))
         {
-            await _taskCommentRepository.Delete(task.Id);
+            await _taskCommentRepository.Delete(comment.Id);
             return;
         }
 
@@ -117,7 +120,7 @@ public class TaskService : ITaskService
 
         var project = await _projectRepository.GetByIdWithTasks(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
-        AuthorizeProjectOwnerOrCollaboratorRequirement(dto.ActorId, project);
+        _authorizationService.AuthorizeProjectOwnerOrCollaboratorRequirement(dto.ActorId, project);
 
         bool isProjectOwner = project.OwnerId == dto.ActorId;
         bool isCollaborator = project.Collaborators.Any(c => c.Id == dto.ActorId);
@@ -133,29 +136,5 @@ public class TaskService : ITaskService
         }
 
         throw new NotAllowedException();
-    }
-
-    /// <summary>
-    /// Checks if the given actor is project owner or collaborator.
-    /// If so, simply returns.
-    /// Otherwise throws suitable exception.
-    /// </summary>
-    /// <param name="actorId"></param>
-    /// <param name="project"></param>
-    /// <exception cref="NotAllowedException"></exception>
-    /// <exception cref="EntityNotFoundException"></exception>
-    public void AuthorizeProjectOwnerOrCollaboratorRequirement(Guid actorId, Project project)
-    {
-        if (project.OwnerId == actorId || project.Collaborators.Any(c => c.Id == actorId))
-        {
-            return;
-        }
-
-        if (project.IsPublic)
-        {
-            throw new NotAllowedException();
-        }
-
-        throw EntityNotFoundException.ForEntity(typeof(Project));
     }
 }

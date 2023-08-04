@@ -13,9 +13,9 @@ public class FakeTaskCommentRepository : ITaskCommentRepository
         _data = data;
     }
 
-    public Task Delete(Guid commentId)
+    public async Task Delete(Guid commentId)
     {
-        throw new NotImplementedException();
+        _data.TaskComments.Remove(_data.TaskComments.First(tc => tc.Id == commentId));
     }
 
     public async Task<TaskComment> Save(TaskComment comment)

@@ -42,10 +42,17 @@ namespace UnitTests
             _fakeProjectRepo = new FakeProjectRepository(_dataDictionary);
             _fakeUserRepo = new FakeUserRepository(_dataDictionary);
 
+            IAuthorizationService _authorizationService = new AuthorizationService();
+
             IValidator<CreateProjectDTO> _createProjectDtoValidator = new CreateProjectDTOValidator();
             IValidator<UpdateProjectDTO> _updateProjectDtoValidator = new UpdateProjectDTOValidator();
 
-            SUT = new ProjectService(_fakeProjectRepo, _fakeUserRepo, _createProjectDtoValidator, _updateProjectDtoValidator);
+            SUT = new ProjectService(
+                _fakeProjectRepo,
+                _fakeUserRepo,
+                _authorizationService,
+                _createProjectDtoValidator,
+                _updateProjectDtoValidator);
         }
 
         [Fact]
@@ -116,7 +123,8 @@ namespace UnitTests
         public async Task Create_Throws_ValidationException()
         {
             // Arrange:
-            CreateProjectDTO dto = new(Guid.NewGuid(), "A");          
+            string invalidProjectName = "A";
+            CreateProjectDTO dto = new(Guid.NewGuid(), invalidProjectName);
 
             // Assert:            
             await Assert.ThrowsAsync<ValidationException>(() => SUT.Create(dto));
@@ -126,7 +134,7 @@ namespace UnitTests
         public async Task Get_NonexistentProject_Throws_NotFoundException()
         {
             // Assert:
-            await Assert.ThrowsAsync<EntityNotFoundException>(() => SUT.Get(null, Guid.NewGuid()));
+            await Assert.ThrowsAsync<EntityNotFoundException>(() => SUT.Get(Guid.NewGuid(), Guid.NewGuid()));
         }
 
         [Fact]
@@ -173,7 +181,7 @@ namespace UnitTests
         }
 
         [Fact]
-        public async Task NotOwner_Cannot_UpdateProject()
+        public async Task Update_PublicProject_Throws_NotAllowedException()
         {
             // Arrange:
             Project project = _dataDictionary.Projects.First(p => p.Title == "PublicProject");

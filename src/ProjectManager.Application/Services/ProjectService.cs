@@ -10,17 +10,20 @@ public class ProjectService : IProjectService
 {
     private readonly IProjectRepository _projectRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IAuthorizationService _authorizationService;
     private readonly IValidator<CreateProjectDTO> _createProjectDtoValidator;
     private readonly IValidator<UpdateProjectDTO> _updateProjectDtoValidator;
 
     public ProjectService(
         IProjectRepository projectRepository,
         IUserRepository userRepository,
+        IAuthorizationService authorizationService,
         IValidator<CreateProjectDTO> createProjectDtoValidator,
         IValidator<UpdateProjectDTO> updateProjectDtoValidator)
     {
         _projectRepository = projectRepository;
         _userRepository = userRepository;
+        _authorizationService = authorizationService;
         _createProjectDtoValidator = createProjectDtoValidator;
         _updateProjectDtoValidator = updateProjectDtoValidator;
     }
@@ -29,7 +32,7 @@ public class ProjectService : IProjectService
     {
         var project = await _projectRepository.GetById(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
-        AuthorizeProjectOwnerRequirement(dto.ActorId, project);
+        _authorizationService.AuthorizeProjectOwnerRequirement(dto.ActorId, project);
 
         var collaborator = await _userRepository.GetById(dto.CollaboratorId) ?? throw EntityNotFoundException.ForEntity(typeof(User));
         project.AddCollaborator(collaborator);
@@ -48,7 +51,7 @@ public class ProjectService : IProjectService
     {
         var project = await _projectRepository.GetById(projectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
-        AuthorizeProjectOwnerRequirement(actorId, project);
+        _authorizationService.AuthorizeProjectOwnerRequirement(actorId, project);
 
         await _projectRepository.Delete(projectId);     
     }
@@ -89,7 +92,7 @@ public class ProjectService : IProjectService
     {
         var project = await _projectRepository.GetById(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
-        AuthorizeProjectOwnerRequirement(dto.ActorId, project);
+        _authorizationService.AuthorizeProjectOwnerRequirement(dto.ActorId, project);
 
         project.RemoveCollaborator(dto.CollaboratorId);        
     }
@@ -100,35 +103,11 @@ public class ProjectService : IProjectService
         
         var project = await _projectRepository.GetById(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
-        AuthorizeProjectOwnerRequirement(dto.ActorId, project);
+        _authorizationService.AuthorizeProjectOwnerRequirement(dto.ActorId, project);
 
         project.Title = dto.Title;
         project.Description = dto.Description;
         project.IsPublic = dto.IsPublic;
         return await _projectRepository.Save(project);
-    }
-
-    /// <summary>
-    /// Checks if the given actor is project owner.
-    /// If so, simply returns.
-    /// Otherwise throws suitable exception.
-    /// </summary>
-    /// <param name="actorId"></param>
-    /// <param name="project"></param>
-    /// <exception cref="NotAllowedException"></exception>
-    /// <exception cref="EntityNotFoundException"></exception>
-    public void AuthorizeProjectOwnerRequirement(Guid actorId, Project project)
-    {
-        if (project.OwnerId == actorId)
-        {
-            return;
-        }
-
-        if (project.IsPublic || project.Collaborators.Any(c => c.Id == actorId))
-        {
-            throw new NotAllowedException();
-        }
-
-        throw EntityNotFoundException.ForEntity(typeof(Project));
     }
 }

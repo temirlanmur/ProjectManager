@@ -45,6 +45,8 @@ public class TaskServiceTests
         _fakeTaskRepo = new FakeTaskRepository(_dataDictionary);
         _fakeTaskCommentRepo = new FakeTaskCommentRepository(_dataDictionary);
 
+        IAuthorizationService _authorizationService = new AuthorizationService();
+
         IValidator<CreateTaskDTO> _createTaskDtoValidator = new CreateTaskDTOValidator();
         IValidator<UpdateTaskDTO> _updateTaskDtoValidator = new UpdateTaskDTOValidator();
         IValidator<DeleteTaskDTO> _deleteTaskDtoValidator = new DeleteTaskDTOValidator();
@@ -55,6 +57,7 @@ public class TaskServiceTests
             _fakeProjectRepo,
             _fakeTaskRepo,
             _fakeTaskCommentRepo,
+            _authorizationService,
             _createTaskDtoValidator,
             _updateTaskDtoValidator,
             _deleteTaskDtoValidator,
@@ -191,16 +194,20 @@ public class TaskServiceTests
     }
 
     [Fact]
-    public async Task ProjectCollaborator_Cannot_DeleteAnyTask()
+    public async Task CommentAuthor_Can_DeleteTheirTaskComments()
     {
         // Arrange:
         Project project = _dataDictionary.Projects.First(p => p.Title == "Project");
-        User projectCollaborator = _dataDictionary.Users.First(u => u.FirstName == "ProjectCollaborator");
+        User commentAuthor = _dataDictionary.Users.First(u => u.FirstName == "TaskAuthor");
         ProjectTask task = _dataDictionary.Tasks.First(t => t.Title == "Task");
         TaskComment comment = _dataDictionary.TaskComments.First(tc => tc.Text == "Author comment");
-        DeleteTaskCommentDTO dto = new(projectCollaborator.Id, project.Id, task.Id, comment.Id);
+        DeleteTaskCommentDTO dto = new(commentAuthor.Id, project.Id, task.Id, comment.Id);
+
+        // Act:
+        await SUT.DeleteComment(dto);
 
         // Assert:
-        await Assert.ThrowsAsync<NotAllowedException>(() => SUT.DeleteComment(dto));
+        IEnumerable<Guid> taskCommentIds = _dataDictionary.TaskComments.Select(tc => tc.Id);
+        Assert.DoesNotContain(comment.Id, taskCommentIds);
     }
 }
