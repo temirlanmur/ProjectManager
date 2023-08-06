@@ -53,7 +53,7 @@ public class ProjectService : IProjectService
 
         _authorizationService.AuthorizeProjectOwnerRequirement(actorId, project);
 
-        await _projectRepository.Delete(projectId);     
+        await _projectRepository.Delete(project);     
     }
 
     public async Task<Project> Get(Guid? actorId, Guid projectId)

@@ -84,7 +84,7 @@ public class TaskService : ITaskService
 
         if (isProjectOwner || (isCollaborator && task.AuthorId == dto.ActorId))
         {
-            await _taskRepository.Delete(task.Id);
+            await _taskRepository.Delete(task);
             return;
         }
 
@@ -107,7 +107,7 @@ public class TaskService : ITaskService
 
         if (isProjectOwner || (isCollaborator && comment.AuthorId == dto.ActorId))
         {
-            await _taskCommentRepository.Delete(comment.Id);
+            await _taskCommentRepository.Delete(comment);
             return;
         }
 

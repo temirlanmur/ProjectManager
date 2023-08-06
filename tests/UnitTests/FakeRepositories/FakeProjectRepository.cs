@@ -13,9 +13,9 @@ public class FakeProjectRepository : IProjectRepository
         _data = data;
     }
 
-    public async Task Delete(Guid projectId)
+    public async Task Delete(Project project)
     {       
-        _data.Projects.Remove(_data.Projects.First(p => p.Id == projectId));
+        _data.Projects.Remove(project);
     }
 
     public async Task<Project?> GetById(Guid projectId)

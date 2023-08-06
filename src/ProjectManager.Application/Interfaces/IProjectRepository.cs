@@ -10,5 +10,5 @@ public interface IProjectRepository
     Task<Project> Save(Project project);
     Task<IEnumerable<Project>> ListPublic();
     Task<IEnumerable<Project>> ListForUser(Guid userId);
-    Task Delete(Guid projectId);
+    Task Delete(Project project);
 }

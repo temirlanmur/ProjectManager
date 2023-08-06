@@ -5,5 +5,5 @@ namespace ProjectManager.Application.Interfaces;
 public interface ITaskRepository
 {
     Task<ProjectTask> Save(ProjectTask task);
-    Task Delete(Guid taskId);
+    Task Delete(ProjectTask task);
 }
