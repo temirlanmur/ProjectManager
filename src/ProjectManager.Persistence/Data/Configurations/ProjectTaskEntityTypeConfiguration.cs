@@ -11,7 +11,8 @@ public class ProjectTaskEntityTypeConfiguration : IEntityTypeConfiguration<Proje
         builder
             .HasOne<User>()
             .WithMany()
-            .HasForeignKey(t => t.AuthorId);
+            .HasForeignKey(t => t.AuthorId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasMany(t => t.Comments)

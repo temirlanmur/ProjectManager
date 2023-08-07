@@ -15,7 +15,10 @@ public class ProjectEntityTypeConfiguration : IEntityTypeConfiguration<Project>
 
         builder
             .HasMany(p => p.Collaborators)
-            .WithMany();
+            .WithMany()
+            .UsingEntity(
+                l => l.HasOne(typeof(User)).WithMany().OnDelete(DeleteBehavior.Restrict),
+                r => r.HasOne(typeof(Project)).WithMany());            
 
         builder
             .HasMany(p => p.Tasks)

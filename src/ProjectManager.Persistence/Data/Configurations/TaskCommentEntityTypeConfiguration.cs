@@ -11,6 +11,7 @@ public class TaskCommentEntityTypeConfiguration : IEntityTypeConfiguration<TaskC
         builder
             .HasOne<User>()
             .WithMany()
-            .HasForeignKey(tc => tc.AuthorId);            
+            .HasForeignKey(tc => tc.AuthorId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
