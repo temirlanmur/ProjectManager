@@ -6,7 +6,7 @@ namespace ProjectManager.Application.Services;
 
 public class AuthorizationService : IAuthorizationService
 {
-    public void AuthorizeProjectOwnerOrCollaboratorRequirement(Guid actorId, Project project)
+    public void ThrowIfNotProjectOwnerOrCollaborator(Guid actorId, Project project)
     {
         if (project.OwnerId == actorId || project.Collaborators.Any(c => c.Id == actorId))
         {
@@ -21,7 +21,7 @@ public class AuthorizationService : IAuthorizationService
         throw EntityNotFoundException.ForEntity(typeof(Project));
     }
 
-    public void AuthorizeProjectOwnerRequirement(Guid actorId, Project project)
+    public void ThrowIfNotProjectOwner(Guid actorId, Project project)
     {
         if (project.OwnerId == actorId)
         {

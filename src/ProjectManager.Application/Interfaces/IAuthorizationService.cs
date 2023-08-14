@@ -11,7 +11,7 @@ public interface IAuthorizationService
     /// </summary>
     /// <param name="actorId"></param>
     /// <param name="project"></param>
-    void AuthorizeProjectOwnerRequirement(Guid actorId, Project project);
+    void ThrowIfNotProjectOwner(Guid actorId, Project project);
 
     /// <summary>
     /// Checks if the given actor is project owner or collaborator.
@@ -20,5 +20,5 @@ public interface IAuthorizationService
     /// </summary>
     /// <param name="actorId"></param>
     /// <param name="project"></param>
-    void AuthorizeProjectOwnerOrCollaboratorRequirement(Guid actorId, Project project);
+    void ThrowIfNotProjectOwnerOrCollaborator(Guid actorId, Project project);
 }

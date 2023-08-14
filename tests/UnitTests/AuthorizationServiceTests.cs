@@ -40,7 +40,7 @@ public class AuthorizationServiceTests
         User projectOwner = _dataDictionary.Users.First(u => u.FirstName == "ProjectOwner");
 
         // Act:
-        Exception? exception = Record.Exception(() => SUT.AuthorizeProjectOwnerRequirement(projectOwner.Id, project));
+        Exception? exception = Record.Exception(() => SUT.ThrowIfNotProjectOwner(projectOwner.Id, project));
 
         // Assert:
         Assert.Null(exception);
@@ -54,7 +54,7 @@ public class AuthorizationServiceTests
         User projectCollaborator = _dataDictionary.Users.First(u => u.FirstName == "ProjectCollaborator");
 
         // Assert:
-        Assert.Throws<NotAllowedException>(() => SUT.AuthorizeProjectOwnerRequirement(projectCollaborator.Id, project));
+        Assert.Throws<NotAllowedException>(() => SUT.ThrowIfNotProjectOwner(projectCollaborator.Id, project));
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class AuthorizationServiceTests
         Project project = _dataDictionary.Projects.First(p => p.Title == "PublicProject");        
 
         // Assert:
-        Assert.Throws<NotAllowedException>(() => SUT.AuthorizeProjectOwnerRequirement(Guid.NewGuid(), project));
+        Assert.Throws<NotAllowedException>(() => SUT.ThrowIfNotProjectOwner(Guid.NewGuid(), project));
     }
 
     [Fact]
@@ -74,7 +74,7 @@ public class AuthorizationServiceTests
         Project project = _dataDictionary.Projects.First(p => p.Title == "PrivateProject");
 
         // Assert:
-        Assert.Throws<EntityNotFoundException>(() => SUT.AuthorizeProjectOwnerRequirement(Guid.NewGuid(), project));
+        Assert.Throws<EntityNotFoundException>(() => SUT.ThrowIfNotProjectOwner(Guid.NewGuid(), project));
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class AuthorizationServiceTests
         User projectOwner = _dataDictionary.Users.First(u => u.FirstName == "ProjectOwner");
 
         // Act:
-        Exception? exception = Record.Exception(() => SUT.AuthorizeProjectOwnerOrCollaboratorRequirement(projectOwner.Id, project));
+        Exception? exception = Record.Exception(() => SUT.ThrowIfNotProjectOwnerOrCollaborator(projectOwner.Id, project));
 
         // Assert:
         Assert.Null(exception);
@@ -99,7 +99,7 @@ public class AuthorizationServiceTests
         User projectCollaborator = _dataDictionary.Users.First(u => u.FirstName == "ProjectCollaborator");
 
         // Act:
-        Exception? exception = Record.Exception(() => SUT.AuthorizeProjectOwnerOrCollaboratorRequirement(projectCollaborator.Id, project));
+        Exception? exception = Record.Exception(() => SUT.ThrowIfNotProjectOwnerOrCollaborator(projectCollaborator.Id, project));
 
         // Assert:
         Assert.Null(exception);
@@ -112,7 +112,7 @@ public class AuthorizationServiceTests
         Project project = _dataDictionary.Projects.First(p => p.Title == "PublicProject");
 
         // Assert:
-        Assert.Throws<NotAllowedException>(() => SUT.AuthorizeProjectOwnerOrCollaboratorRequirement(Guid.NewGuid(), project));
+        Assert.Throws<NotAllowedException>(() => SUT.ThrowIfNotProjectOwnerOrCollaborator(Guid.NewGuid(), project));
     }
 
     [Fact]
@@ -122,6 +122,6 @@ public class AuthorizationServiceTests
         Project project = _dataDictionary.Projects.First(p => p.Title == "PrivateProject");
 
         // Assert:
-        Assert.Throws<EntityNotFoundException>(() => SUT.AuthorizeProjectOwnerOrCollaboratorRequirement(Guid.NewGuid(), project));
+        Assert.Throws<EntityNotFoundException>(() => SUT.ThrowIfNotProjectOwnerOrCollaborator(Guid.NewGuid(), project));
     }
 }
