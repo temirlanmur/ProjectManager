@@ -3,6 +3,7 @@ using ProjectManager.Application.DTOs.ProjectDTOs;
 using ProjectManager.Application.Exceptions;
 using ProjectManager.Application.Interfaces;
 using ProjectManager.Domain.Entities;
+using ProjectManager.Domain.Exceptions;
 
 namespace ProjectManager.Application.Services;
 
@@ -35,7 +36,15 @@ public class ProjectService : IProjectService
         _authorizationService.ThrowIfNotProjectOwner(dto.ActorId, project);
 
         var collaborator = await _userRepository.GetById(dto.CollaboratorId) ?? throw EntityNotFoundException.ForEntity(typeof(User));
-        project.AddCollaborator(collaborator);
+        
+        try
+        {
+            project.AddCollaborator(collaborator);
+        }
+        catch (AlreadyCollaboratorException ex)
+        {
+            throw new BadRequestException(ex.Message);
+        }
     }
 
     public async Task<Project> Create(CreateProjectDTO dto)
@@ -94,7 +103,14 @@ public class ProjectService : IProjectService
 
         _authorizationService.ThrowIfNotProjectOwner(dto.ActorId, project);
 
-        project.RemoveCollaborator(dto.CollaboratorId);        
+        try
+        {
+            project.RemoveCollaborator(dto.CollaboratorId);
+        }
+        catch (CollaboratorNotFoundException ex)
+        {
+            throw new BadRequestException(ex.Message);
+        }
     }
 
     public async Task<Project> Update(UpdateProjectDTO dto)

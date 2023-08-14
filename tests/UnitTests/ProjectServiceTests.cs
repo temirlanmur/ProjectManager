@@ -5,7 +5,6 @@ using ProjectManager.Application.Interfaces;
 using ProjectManager.Application.Services;
 using ProjectManager.Application.Validators;
 using ProjectManager.Domain.Entities;
-using ProjectManager.Domain.Exceptions;
 using UnitTests.Extensions;
 using UnitTests.FakeRepositories;
 
@@ -247,7 +246,7 @@ namespace UnitTests
             AddRemoveCollaboratorDTO dto = new(projectOwner.Id, project.Id, collaborator.Id);
 
             // Assert:
-            await Assert.ThrowsAsync<AlreadyCollaboratorException>(() => SUT.AddCollaborator(dto));
+            await Assert.ThrowsAsync<BadRequestException>(() => SUT.AddCollaborator(dto));
         }
 
         [Fact]
@@ -278,7 +277,7 @@ namespace UnitTests
             AddRemoveCollaboratorDTO dto = new(projectOwner.Id, project.Id, Guid.NewGuid());
 
             // Assert:
-            await Assert.ThrowsAsync<CollaboratorNotFoundException>(() => SUT.RemoveCollaborator(dto));
+            await Assert.ThrowsAsync<BadRequestException>(() => SUT.RemoveCollaborator(dto));
         }
     }
 }
