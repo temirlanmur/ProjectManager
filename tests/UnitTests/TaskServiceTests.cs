@@ -74,7 +74,7 @@ public class TaskServiceTests
         CreateTaskDTO dto = new(collaborator.Id, project.Id, "New Task");
 
         // Act:
-        ProjectTask newTask = await SUT.Create(dto);
+        ProjectTask newTask = await SUT.CreateAsync(dto);
 
         // Assert:
         ProjectTask created = _dataDictionary.Tasks.First(t => t.Title == "New Task");
@@ -92,7 +92,7 @@ public class TaskServiceTests
         CreateTaskDTO dto = new(Guid.NewGuid(), project.Id, "New Task");
 
         // Assert:
-        await Assert.ThrowsAsync<NotAllowedException>(() => SUT.Create(dto));
+        await Assert.ThrowsAsync<NotAllowedException>(() => SUT.CreateAsync(dto));
     }
 
     [Fact]
@@ -105,7 +105,7 @@ public class TaskServiceTests
         UpdateTaskDTO dto = new(projectOwner.Id, project.Id, task.Id, "Updated Task", "Description");
 
         // Act:
-        ProjectTask updatedTask = await SUT.Update(dto);
+        ProjectTask updatedTask = await SUT.UpdateAsync(dto);
 
         // Assert:
         Assert.Equal("Updated Task", updatedTask.Title);
@@ -122,7 +122,7 @@ public class TaskServiceTests
         UpdateTaskDTO dto = new(taskAuthor.Id, project.Id, task.Id, "Updated Task", "Description");
 
         // Act:
-        ProjectTask updatedTask = await SUT.Update(dto);
+        ProjectTask updatedTask = await SUT.UpdateAsync(dto);
 
         // Assert:
         Assert.Equal("Updated Task", updatedTask.Title);
@@ -139,7 +139,7 @@ public class TaskServiceTests
         UpdateTaskDTO dto = new(projectCollaborator.Id, project.Id, task.Id, "Updated Task", "Description");
 
         // Assert:
-        await Assert.ThrowsAsync<NotAllowedException>(() => SUT.Update(dto));
+        await Assert.ThrowsAsync<NotAllowedException>(() => SUT.UpdateAsync(dto));
     }
 
     [Fact]
@@ -152,7 +152,7 @@ public class TaskServiceTests
         DeleteTaskDTO dto = new(projectOwner.Id, project.Id, task.Id);
 
         // Act:
-        await SUT.Delete(dto);
+        await SUT.DeleteAsync(dto);
 
         // Assert:
         IEnumerable<Guid> projectTaskIds = _dataDictionary.Tasks.Select(t => t.Id);
@@ -169,7 +169,7 @@ public class TaskServiceTests
         DeleteTaskDTO dto = new(taskAuthor.Id, project.Id, task.Id);
 
         // Act:
-        await SUT.Delete(dto);
+        await SUT.DeleteAsync(dto);
 
         // Assert:
         IEnumerable<Guid> projectTaskIds = _dataDictionary.Tasks.Select(t => t.Id);
@@ -186,7 +186,7 @@ public class TaskServiceTests
         CreateTaskCommentDTO dto = new(projectCollaborator.Id, project.Id, task.Id, "New comment");
 
         // Act:
-        await SUT.AddComment(dto);
+        await SUT.AddCommentAsync(dto);
 
         // Assert:
         IEnumerable<TaskComment> taskCommentIds = _dataDictionary.TaskComments.Where(tc => tc.TaskId == task.Id);
@@ -204,7 +204,7 @@ public class TaskServiceTests
         DeleteTaskCommentDTO dto = new(commentAuthor.Id, project.Id, task.Id, comment.Id);
 
         // Act:
-        await SUT.DeleteComment(dto);
+        await SUT.DeleteCommentAsync(dto);
 
         // Assert:
         IEnumerable<Guid> taskCommentIds = _dataDictionary.TaskComments.Select(tc => tc.Id);

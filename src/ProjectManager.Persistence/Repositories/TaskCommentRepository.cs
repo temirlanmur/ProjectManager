@@ -13,13 +13,13 @@ public class TaskCommentRepository : ITaskCommentRepository
         _dbContext = dbContext;
     }
 
-    public async Task Delete(TaskComment comment)
+    public async Task DeleteAsync(TaskComment comment)
     {
         _dbContext.TaskComments.Remove(comment);
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<TaskComment> Save(TaskComment comment)
+    public async Task<TaskComment> SaveAsync(TaskComment comment)
     {
         _dbContext.TaskComments.Update(comment);
         await _dbContext.SaveChangesAsync();

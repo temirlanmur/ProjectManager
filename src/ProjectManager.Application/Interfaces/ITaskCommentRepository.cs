@@ -4,6 +4,6 @@ namespace ProjectManager.Application.Interfaces;
 
 public interface ITaskCommentRepository
 {
-    Task<TaskComment> Save(TaskComment comment);
-    Task Delete(TaskComment comment);
+    Task<TaskComment> SaveAsync(TaskComment comment);
+    Task DeleteAsync(TaskComment comment);
 }

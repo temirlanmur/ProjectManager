@@ -13,17 +13,17 @@ public class FakeProjectRepository : IProjectRepository
         _data = data;
     }
 
-    public async Task Delete(Project project)
+    public async Task DeleteAsync(Project project)
     {       
         _data.Projects.Remove(project);
     }
 
-    public async Task<Project?> GetById(Guid projectId)
+    public async Task<Project?> GetByIdAsync(Guid projectId)
     {
         return _data.Projects.FirstOrDefault(p => p.Id == projectId);        
     }
 
-    public async Task<Project?> GetByIdWithTasksAndComments(Guid projectId)
+    public async Task<Project?> GetByIdWithTasksAndCommentsAsync(Guid projectId)
     {
         var project = _data.Projects.FirstOrDefault(p => p.Id == projectId);
 
@@ -43,17 +43,17 @@ public class FakeProjectRepository : IProjectRepository
         return project.IncludeTasks(tasks);
     }
 
-    public async Task<IEnumerable<Project>> ListForUser(Guid userId)
+    public async Task<IEnumerable<Project>> ListForUserAsync(Guid userId)
     {
         return _data.Projects.Where(p => p.IsPublic == true || p.OwnerId == userId || p.Collaborators.Any(c => c.Id == userId));
     }
 
-    public async Task<IEnumerable<Project>> ListPublic()
+    public async Task<IEnumerable<Project>> ListPublicAsync()
     {
         return _data.Projects.Where(p => p.IsPublic);
     }
 
-    public async Task<Project> Save(Project project)
+    public async Task<Project> SaveAsync(Project project)
     {
         var existingProject = _data.Projects.FirstOrDefault(p => p.Id == project.Id);
 
@@ -67,7 +67,7 @@ public class FakeProjectRepository : IProjectRepository
         return project;
     }
 
-    public async Task<Project?> GetByIdWithTasks(Guid projectId)
+    public async Task<Project?> GetByIdWithTasksAsync(Guid projectId)
     {
         var project = _data.Projects.FirstOrDefault(p => p.Id == projectId);
 

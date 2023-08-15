@@ -13,12 +13,12 @@ public class FakeTaskCommentRepository : ITaskCommentRepository
         _data = data;
     }
 
-    public async Task Delete(TaskComment comment)
+    public async Task DeleteAsync(TaskComment comment)
     {
         _data.TaskComments.Remove(comment);
     }
 
-    public async Task<TaskComment> Save(TaskComment comment)
+    public async Task<TaskComment> SaveAsync(TaskComment comment)
     {
         var existingComment = _data.TaskComments.FirstOrDefault(t => t.Id == comment.Id);
 

@@ -13,13 +13,13 @@ public class TaskRepository : ITaskRepository
         _dbContext = dbContext;
     }
 
-    public async Task Delete(ProjectTask task)
+    public async Task DeleteAsync(ProjectTask task)
     {
         _dbContext.Tasks.Remove(task);
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<ProjectTask> Save(ProjectTask task)
+    public async Task<ProjectTask> SaveAsync(ProjectTask task)
     {
         _dbContext.Tasks.Update(task);
         await _dbContext.SaveChangesAsync();

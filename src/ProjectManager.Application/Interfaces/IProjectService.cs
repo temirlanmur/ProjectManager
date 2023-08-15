@@ -10,14 +10,14 @@ public interface IProjectService
     /// </summary>
     /// <param name="actorId">Authenticated user's ID, or null, if the user is unauthenticated.</param>
     /// <returns></returns>
-    Task<IEnumerable<Project>> List(Guid? actorId = null);
+    Task<IEnumerable<Project>> ListAsync(Guid? actorId = null);
     
     /// <summary>
     /// Creates new project.
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    Task<Project> Create(CreateProjectDTO dto);
+    Task<Project> CreateAsync(CreateProjectDTO dto);
 
     /// <summary>
     /// Gets project by its ID.
@@ -25,14 +25,14 @@ public interface IProjectService
     /// <param name="actorId">Authenticated user's ID, or null, if the user is unauthenticated.</param>
     /// <param name="projectId"></param>
     /// <returns></returns>
-    Task<Project> Get(Guid? actorId, Guid projectId);
+    Task<Project> GetByIdAsync(Guid? actorId, Guid projectId);
 
     /// <summary>
     /// Updates project.
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    Task<Project> Update(UpdateProjectDTO dto);
+    Task<Project> UpdateAsync(UpdateProjectDTO dto);
 
     /// <summary>
     /// Deletes project.
@@ -40,19 +40,19 @@ public interface IProjectService
     /// <param name="actorId">ID of the user who makes the request to delete.</param>
     /// <param name="projectId"></param>
     /// <returns></returns>
-    Task Delete(Guid actorId, Guid projectId);
+    Task DeleteAsync(Guid actorId, Guid projectId);
 
     /// <summary>
     /// Adds collaborator to the project.
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    Task AddCollaborator(AddRemoveCollaboratorDTO dto);
+    Task AddCollaboratorAsync(AddRemoveCollaboratorDTO dto);
 
     /// <summary>
     /// Removes collaborator from the project.
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    Task RemoveCollaborator(AddRemoveCollaboratorDTO dto);
+    Task RemoveCollaboratorAsync(AddRemoveCollaboratorDTO dto);
 }

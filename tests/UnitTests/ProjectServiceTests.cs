@@ -62,7 +62,7 @@ namespace UnitTests
             Project privateProject = _dataDictionary.Projects.First(p => p.Title == "PrivateProject");
 
             // Act:
-            IEnumerable<Project> result = await SUT.List();
+            IEnumerable<Project> result = await SUT.ListAsync();
 
             // Assert:
             Assert.DoesNotContain(privateProject, result);
@@ -78,7 +78,7 @@ namespace UnitTests
             Project privateProject = _dataDictionary.Projects.First(p => p.Title == "PrivateProject");
 
             // Act:
-            IEnumerable<Project> result = await SUT.List(publicProjectOwner.Id);
+            IEnumerable<Project> result = await SUT.ListAsync(publicProjectOwner.Id);
 
             // Assert:
             Assert.DoesNotContain(privateProject, result);
@@ -94,7 +94,7 @@ namespace UnitTests
             Project privateProject = _dataDictionary.Projects.First(p => p.Title == "PrivateProject");
 
             // Act:
-            IEnumerable<Project> result = await SUT.List(privateProjectOwner.Id);
+            IEnumerable<Project> result = await SUT.ListAsync(privateProjectOwner.Id);
 
             // Assert:            
             Assert.Contains(privateProject, result);
@@ -109,7 +109,7 @@ namespace UnitTests
             CreateProjectDTO dto = new(user.Id, "New Project");
 
             // Act:
-            Project newProject = await SUT.Create(dto);
+            Project newProject = await SUT.CreateAsync(dto);
 
             // Assert:
             Project created = _dataDictionary.Projects.First(p => p.Title == "New Project");
@@ -126,14 +126,14 @@ namespace UnitTests
             CreateProjectDTO dto = new(Guid.NewGuid(), invalidProjectName);
 
             // Assert:            
-            await Assert.ThrowsAsync<ValidationException>(() => SUT.Create(dto));
+            await Assert.ThrowsAsync<ValidationException>(() => SUT.CreateAsync(dto));
         }
 
         [Fact]
         public async Task Get_NonexistentProject_Throws_NotFoundException()
         {
             // Assert:
-            await Assert.ThrowsAsync<EntityNotFoundException>(() => SUT.Get(Guid.NewGuid(), Guid.NewGuid()));
+            await Assert.ThrowsAsync<EntityNotFoundException>(() => SUT.GetByIdAsync(Guid.NewGuid(), Guid.NewGuid()));
         }
 
         [Fact]
@@ -144,7 +144,7 @@ namespace UnitTests
             Project privateProject = _dataDictionary.Projects.First(p => p.Title == "PrivateProject");
 
             // Assert:
-            await Assert.ThrowsAsync<EntityNotFoundException>(() => SUT.Get(publicProjectOwner.Id, privateProject.Id));
+            await Assert.ThrowsAsync<EntityNotFoundException>(() => SUT.GetByIdAsync(publicProjectOwner.Id, privateProject.Id));
         }
 
         [Fact]
@@ -155,7 +155,7 @@ namespace UnitTests
             Project privateProject = _dataDictionary.Projects.First(p => p.Title == "PrivateProject");
 
             // Act:
-            Project retrievedProject = await SUT.Get(privateProjectOwner.Id, privateProject.Id);
+            Project retrievedProject = await SUT.GetByIdAsync(privateProjectOwner.Id, privateProject.Id);
 
             // Assert:
             Assert.Equal(privateProject.Id, retrievedProject.Id);
@@ -171,7 +171,7 @@ namespace UnitTests
             UpdateProjectDTO dto = new(projectOwner.Id, project.Id, "NewTitle", "NewDescription", false);            
 
             // Act:
-            Project updatedProject = await SUT.Update(dto);
+            Project updatedProject = await SUT.UpdateAsync(dto);
 
             // Assert:
             Assert.Equal("NewTitle", updatedProject.Title);
@@ -187,7 +187,7 @@ namespace UnitTests
             UpdateProjectDTO dto = new(Guid.NewGuid(), project.Id, "NewTitle", "NewDescription", false);
             
             // Assert:
-            await Assert.ThrowsAsync<NotAllowedException>(() => SUT.Update(dto));
+            await Assert.ThrowsAsync<NotAllowedException>(() => SUT.UpdateAsync(dto));
         }
 
         [Fact]
@@ -198,7 +198,7 @@ namespace UnitTests
             UpdateProjectDTO dto = new(Guid.NewGuid(), project.Id, "NewTitle", "NewDescription", false);            
 
             // Assert:
-            await Assert.ThrowsAsync<EntityNotFoundException>(() => SUT.Update(dto));
+            await Assert.ThrowsAsync<EntityNotFoundException>(() => SUT.UpdateAsync(dto));
         }
 
         [Fact]
@@ -209,7 +209,7 @@ namespace UnitTests
             Project project = _dataDictionary.Projects.First(p => p.Title == "PublicProject");
 
             // Act:
-            await SUT.Delete(projectOwner.Id, project.Id);
+            await SUT.DeleteAsync(projectOwner.Id, project.Id);
 
             // Assert:
             IEnumerable<Guid> projectIds = _dataDictionary.Projects.Select(p => p.Id);
@@ -228,7 +228,7 @@ namespace UnitTests
             AddRemoveCollaboratorDTO dto = new(projectOwner.Id, project.Id, newCollaborator.Id);
 
             // Act:
-            await SUT.AddCollaborator(dto);
+            await SUT.AddCollaboratorAsync(dto);
 
             // Assert:
             Assert.Contains(project.Collaborators, c => c.Id == newCollaborator.Id);
@@ -246,7 +246,7 @@ namespace UnitTests
             AddRemoveCollaboratorDTO dto = new(projectOwner.Id, project.Id, collaborator.Id);
 
             // Assert:
-            await Assert.ThrowsAsync<BadRequestException>(() => SUT.AddCollaborator(dto));
+            await Assert.ThrowsAsync<BadRequestException>(() => SUT.AddCollaboratorAsync(dto));
         }
 
         [Fact]
@@ -261,7 +261,7 @@ namespace UnitTests
             AddRemoveCollaboratorDTO dto = new(projectOwner.Id, project.Id, collaborator.Id);
 
             // Act:
-            await SUT.RemoveCollaborator(dto);
+            await SUT.RemoveCollaboratorAsync(dto);
 
             // Assert:
             Assert.Empty(project.Collaborators);
@@ -277,7 +277,7 @@ namespace UnitTests
             AddRemoveCollaboratorDTO dto = new(projectOwner.Id, project.Id, Guid.NewGuid());
 
             // Assert:
-            await Assert.ThrowsAsync<BadRequestException>(() => SUT.RemoveCollaborator(dto));
+            await Assert.ThrowsAsync<BadRequestException>(() => SUT.RemoveCollaboratorAsync(dto));
         }
     }
 }

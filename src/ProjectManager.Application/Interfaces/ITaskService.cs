@@ -10,33 +10,33 @@ public interface ITaskService
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    Task<ProjectTask> Create(CreateTaskDTO dto);
+    Task<ProjectTask> CreateAsync(CreateTaskDTO dto);
 
     /// <summary>
     /// Updates task.
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    Task<ProjectTask> Update(UpdateTaskDTO dto);
+    Task<ProjectTask> UpdateAsync(UpdateTaskDTO dto);
 
     /// <summary>
     /// Deletes task.
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    Task Delete(DeleteTaskDTO dto);
+    Task DeleteAsync(DeleteTaskDTO dto);
 
     /// <summary>
     /// Adds task comment.
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    Task<TaskComment> AddComment(CreateTaskCommentDTO dto);
+    Task<TaskComment> AddCommentAsync(CreateTaskCommentDTO dto);
 
     /// <summary>
     /// Deletes task comment.
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    Task DeleteComment(DeleteTaskCommentDTO dto);
+    Task DeleteCommentAsync(DeleteTaskCommentDTO dto);
 }

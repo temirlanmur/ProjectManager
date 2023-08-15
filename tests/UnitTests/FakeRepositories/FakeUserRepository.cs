@@ -12,7 +12,7 @@ public class FakeUserRepository : IUserRepository
         _data = data;
     }
 
-    public async Task<User?> GetById(Guid userId)
+    public async Task<User?> GetByIdAsync(Guid userId)
     {
         return _data.Users.FirstOrDefault(u => u.Id == userId);
     }

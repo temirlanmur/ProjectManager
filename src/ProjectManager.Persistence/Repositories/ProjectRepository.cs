@@ -14,26 +14,26 @@ public class ProjectRepository : IProjectRepository
         _dbContext = dbContext;
     }
 
-    public async Task Delete(Project project)
+    public async Task DeleteAsync(Project project)
     {
         _dbContext.Projects.Remove(project);
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<Project?> GetById(Guid projectId)
+    public async Task<Project?> GetByIdAsync(Guid projectId)
     {
         return await _dbContext.Projects
             .FirstOrDefaultAsync(p => p.Id == projectId);
     }
 
-    public async Task<Project?> GetByIdWithTasks(Guid projectId)
+    public async Task<Project?> GetByIdWithTasksAsync(Guid projectId)
     {
         return await _dbContext.Projects
             .Include(p => p.Tasks)
             .FirstOrDefaultAsync(p => p.Id == projectId);
     }
 
-    public async Task<Project?> GetByIdWithTasksAndComments(Guid projectId)
+    public async Task<Project?> GetByIdWithTasksAndCommentsAsync(Guid projectId)
     {
         return await _dbContext.Projects
             .Include(p => p.Tasks)
@@ -41,7 +41,7 @@ public class ProjectRepository : IProjectRepository
             .FirstOrDefaultAsync(p => p.Id == projectId);
     }
 
-    public async Task<IEnumerable<Project>> ListForUser(Guid userId)
+    public async Task<IEnumerable<Project>> ListForUserAsync(Guid userId)
     {
         var projects = await _dbContext.Projects.ToListAsync();
         return projects
@@ -50,14 +50,14 @@ public class ProjectRepository : IProjectRepository
                         p.Collaborators.Any(c => c.Id == userId));
     }
 
-    public async Task<IEnumerable<Project>> ListPublic()
+    public async Task<IEnumerable<Project>> ListPublicAsync()
     {
         return await _dbContext.Projects
             .Where(p => p.IsPublic)
             .ToListAsync();
     }
 
-    public async Task<Project> Save(Project project)
+    public async Task<Project> SaveAsync(Project project)
     {
         _dbContext.Projects.Update(project);
         await _dbContext.SaveChangesAsync();

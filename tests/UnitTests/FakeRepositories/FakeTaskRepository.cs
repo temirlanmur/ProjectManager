@@ -12,12 +12,12 @@ public class FakeTaskRepository : ITaskRepository
         _data = data;
     }
 
-    public async Task Delete(ProjectTask task)
+    public async Task DeleteAsync(ProjectTask task)
     {
         _data.Tasks.Remove(task);
     }
 
-    public async Task<ProjectTask> Save(ProjectTask task)
+    public async Task<ProjectTask> SaveAsync(ProjectTask task)
     {
         var existingTask = _data.Tasks.FirstOrDefault(p => p.Id == task.Id);
 

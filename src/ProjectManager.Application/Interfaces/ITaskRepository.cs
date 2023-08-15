@@ -4,6 +4,6 @@ namespace ProjectManager.Application.Interfaces;
 
 public interface ITaskRepository
 {
-    Task<ProjectTask> Save(ProjectTask task);
-    Task Delete(ProjectTask task);
+    Task<ProjectTask> SaveAsync(ProjectTask task);
+    Task DeleteAsync(ProjectTask task);
 }

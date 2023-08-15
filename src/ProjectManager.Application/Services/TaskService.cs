@@ -40,11 +40,11 @@ public class TaskService : ITaskService
         _deleteTaskCommentDtoValidator = deleteTaskCommentDtoValidator;
     }
 
-    public async Task<TaskComment> AddComment(CreateTaskCommentDTO dto)
+    public async Task<TaskComment> AddCommentAsync(CreateTaskCommentDTO dto)
     {
         await _createTaskCommentDtoValidator.ValidateAndThrowAsync(dto);
 
-        var project = await _projectRepository.GetByIdWithTasks(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
+        var project = await _projectRepository.GetByIdWithTasksAsync(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
         _authorizationService.ThrowIfNotProjectOwnerOrCollaborator(dto.ActorId, project);
 
@@ -54,26 +54,26 @@ public class TaskService : ITaskService
         var task = project.Tasks.FirstOrDefault(t => t.Id == dto.TaskId) ?? throw EntityNotFoundException.ForEntity(typeof(ProjectTask));
 
         TaskComment comment = new(dto.TaskId, dto.ActorId, dto.Text);
-        return await _taskCommentRepository.Save(comment);
+        return await _taskCommentRepository.SaveAsync(comment);
     }
 
-    public async Task<ProjectTask> Create(CreateTaskDTO dto)
+    public async Task<ProjectTask> CreateAsync(CreateTaskDTO dto)
     {
         await _createTaskDtoValidator.ValidateAndThrowAsync(dto);
 
-        var project = await _projectRepository.GetById(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
+        var project = await _projectRepository.GetByIdAsync(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
         _authorizationService.ThrowIfNotProjectOwnerOrCollaborator(dto.ActorId, project);
 
         ProjectTask task = new(dto.ProjectId, dto.ActorId, dto.Title, dto.Description);
-        return await _taskRepository.Save(task);
+        return await _taskRepository.SaveAsync(task);
     }
 
-    public async Task Delete(DeleteTaskDTO dto)
+    public async Task DeleteAsync(DeleteTaskDTO dto)
     {
         await _deleteTaskDtoValidator.ValidateAndThrowAsync(dto);
 
-        var project = await _projectRepository.GetByIdWithTasks(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
+        var project = await _projectRepository.GetByIdWithTasksAsync(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
         _authorizationService.ThrowIfNotProjectOwnerOrCollaborator(dto.ActorId, project);
 
@@ -84,18 +84,18 @@ public class TaskService : ITaskService
 
         if (isProjectOwner || (isCollaborator && task.AuthorId == dto.ActorId))
         {
-            await _taskRepository.Delete(task);
+            await _taskRepository.DeleteAsync(task);
             return;
         }
 
         throw new NotAllowedException();
     }
 
-    public async Task DeleteComment(DeleteTaskCommentDTO dto)
+    public async Task DeleteCommentAsync(DeleteTaskCommentDTO dto)
     {
         await _deleteTaskCommentDtoValidator.ValidateAndThrowAsync(dto);
 
-        var project = await _projectRepository.GetByIdWithTasksAndComments(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
+        var project = await _projectRepository.GetByIdWithTasksAndCommentsAsync(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
         _authorizationService.ThrowIfNotProjectOwnerOrCollaborator(dto.ActorId, project);
 
@@ -107,18 +107,18 @@ public class TaskService : ITaskService
 
         if (isProjectOwner || (isCollaborator && comment.AuthorId == dto.ActorId))
         {
-            await _taskCommentRepository.Delete(comment);
+            await _taskCommentRepository.DeleteAsync(comment);
             return;
         }
 
         throw new NotAllowedException();
     }
 
-    public async Task<ProjectTask> Update(UpdateTaskDTO dto)
+    public async Task<ProjectTask> UpdateAsync(UpdateTaskDTO dto)
     {
         await _updateTaskDtoValidator.ValidateAndThrowAsync(dto);
 
-        var project = await _projectRepository.GetByIdWithTasks(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
+        var project = await _projectRepository.GetByIdWithTasksAsync(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
         _authorizationService.ThrowIfNotProjectOwnerOrCollaborator(dto.ActorId, project);
 
@@ -132,7 +132,7 @@ public class TaskService : ITaskService
             task.Title = dto.Title;
             task.Description = dto.Description;
 
-            return await _taskRepository.Save(task);
+            return await _taskRepository.SaveAsync(task);
         }
 
         throw new NotAllowedException();

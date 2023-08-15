@@ -53,7 +53,7 @@ namespace IntegrationTests
                 DeleteTaskCommentDtoValidator);
 
             // Act:
-            await SUT.AddComment(dto);
+            await SUT.AddCommentAsync(dto);
 
             // Assert:
             IEnumerable<TaskComment> taskCommentIds = context.TaskComments.Where(tc => tc.TaskId == task.Id);
@@ -89,7 +89,7 @@ namespace IntegrationTests
                 DeleteTaskCommentDtoValidator);
 
             // Act:
-            await SUT.DeleteComment(dto);
+            await SUT.DeleteCommentAsync(dto);
 
             // Assert:
             IEnumerable<Guid> taskCommentIds = context.TaskComments.Select(tc => tc.Id);
@@ -124,7 +124,7 @@ namespace IntegrationTests
                 DeleteTaskCommentDtoValidator);
 
             // Assert:
-            await Assert.ThrowsAsync<EntityNotFoundException>(() => SUT.AddComment(dto));
+            await Assert.ThrowsAsync<EntityNotFoundException>(() => SUT.AddCommentAsync(dto));
         }
     }
 }

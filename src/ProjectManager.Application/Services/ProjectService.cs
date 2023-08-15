@@ -29,13 +29,13 @@ public class ProjectService : IProjectService
         _updateProjectDtoValidator = updateProjectDtoValidator;
     }
 
-    public async Task AddCollaborator(AddRemoveCollaboratorDTO dto)
+    public async Task AddCollaboratorAsync(AddRemoveCollaboratorDTO dto)
     {
-        var project = await _projectRepository.GetById(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
+        var project = await _projectRepository.GetByIdAsync(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
         _authorizationService.ThrowIfNotProjectOwner(dto.ActorId, project);
 
-        var collaborator = await _userRepository.GetById(dto.CollaboratorId) ?? throw EntityNotFoundException.ForEntity(typeof(User));
+        var collaborator = await _userRepository.GetByIdAsync(dto.CollaboratorId) ?? throw EntityNotFoundException.ForEntity(typeof(User));
         
         try
         {
@@ -47,27 +47,27 @@ public class ProjectService : IProjectService
         }
     }
 
-    public async Task<Project> Create(CreateProjectDTO dto)
+    public async Task<Project> CreateAsync(CreateProjectDTO dto)
     {
         await _createProjectDtoValidator.ValidateAndThrowAsync(dto);
 
         var project = new Project(dto.OwnerId, dto.Title, dto.Description, dto.IsPublic);
 
-        return await _projectRepository.Save(project);
+        return await _projectRepository.SaveAsync(project);
     }
 
-    public async Task Delete(Guid actorId, Guid projectId)
+    public async Task DeleteAsync(Guid actorId, Guid projectId)
     {
-        var project = await _projectRepository.GetById(projectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
+        var project = await _projectRepository.GetByIdAsync(projectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
         _authorizationService.ThrowIfNotProjectOwner(actorId, project);
 
-        await _projectRepository.Delete(project);     
+        await _projectRepository.DeleteAsync(project);     
     }
 
-    public async Task<Project> Get(Guid? actorId, Guid projectId)
+    public async Task<Project> GetByIdAsync(Guid? actorId, Guid projectId)
     {
-        var project = await _projectRepository.GetByIdWithTasksAndComments(projectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
+        var project = await _projectRepository.GetByIdWithTasksAndCommentsAsync(projectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
         if (project.IsPublic)
         {
@@ -87,19 +87,19 @@ public class ProjectService : IProjectService
         throw EntityNotFoundException.ForEntity(typeof(Project));
     }
 
-    public async Task<IEnumerable<Project>> List(Guid? actorId = null)
+    public async Task<IEnumerable<Project>> ListAsync(Guid? actorId = null)
     {
         if (actorId is null)
         {
-            return await _projectRepository.ListPublic();
+            return await _projectRepository.ListPublicAsync();
         }
 
-        return await _projectRepository.ListForUser(actorId.Value);
+        return await _projectRepository.ListForUserAsync(actorId.Value);
     }
 
-    public async Task RemoveCollaborator(AddRemoveCollaboratorDTO dto)
+    public async Task RemoveCollaboratorAsync(AddRemoveCollaboratorDTO dto)
     {
-        var project = await _projectRepository.GetById(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
+        var project = await _projectRepository.GetByIdAsync(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
         _authorizationService.ThrowIfNotProjectOwner(dto.ActorId, project);
 
@@ -113,17 +113,17 @@ public class ProjectService : IProjectService
         }
     }
 
-    public async Task<Project> Update(UpdateProjectDTO dto)
+    public async Task<Project> UpdateAsync(UpdateProjectDTO dto)
     {
         await _updateProjectDtoValidator.ValidateAndThrowAsync(dto);
         
-        var project = await _projectRepository.GetById(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
+        var project = await _projectRepository.GetByIdAsync(dto.ProjectId) ?? throw EntityNotFoundException.ForEntity(typeof(Project));
 
         _authorizationService.ThrowIfNotProjectOwner(dto.ActorId, project);
 
         project.Title = dto.Title;
         project.Description = dto.Description;
         project.IsPublic = dto.IsPublic;
-        return await _projectRepository.Save(project);
+        return await _projectRepository.SaveAsync(project);
     }
 }

@@ -4,5 +4,5 @@ namespace ProjectManager.Application.Interfaces;
 
 public interface IUserRepository
 {
-    Task<User?> GetById(Guid userId);
+    Task<User?> GetByIdAsync(Guid userId);
 }
