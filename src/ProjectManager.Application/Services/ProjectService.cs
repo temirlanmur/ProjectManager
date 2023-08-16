@@ -40,6 +40,7 @@ public class ProjectService : IProjectService
         try
         {
             project.AddCollaborator(collaborator);
+            await _projectRepository.SaveAsync(project);
         }
         catch (AlreadyCollaboratorException ex)
         {
@@ -106,6 +107,7 @@ public class ProjectService : IProjectService
         try
         {
             project.RemoveCollaborator(dto.CollaboratorId);
+            await _projectRepository.SaveAsync(project);
         }
         catch (CollaboratorNotFoundException ex)
         {
