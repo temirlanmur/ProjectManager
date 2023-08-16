@@ -11,9 +11,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0B117E19
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "tests\UnitTests\UnitTests.csproj", "{6FAFDF4A-8E9D-4A18-B2C3-482A6132BBDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectManager.Persistence", "src\ProjectManager.Persistence\ProjectManager.Persistence.csproj", "{879B5DCE-3313-4887-AE7E-BEA4F9BE5F23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectManager.Persistence", "src\ProjectManager.Persistence\ProjectManager.Persistence.csproj", "{879B5DCE-3313-4887-AE7E-BEA4F9BE5F23}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "tests\IntegrationTests\IntegrationTests.csproj", "{E41EBF2D-0400-4C2A-9500-81124C225E8E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTests", "tests\IntegrationTests\IntegrationTests.csproj", "{E41EBF2D-0400-4C2A-9500-81124C225E8E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectManager.WebAPI", "src\ProjectManager.WebAPI\ProjectManager.WebAPI.csproj", "{D650E536-758E-4486-9DEC-25EACDE65ABE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,10 @@ Global
 		{E41EBF2D-0400-4C2A-9500-81124C225E8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E41EBF2D-0400-4C2A-9500-81124C225E8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E41EBF2D-0400-4C2A-9500-81124C225E8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D650E536-758E-4486-9DEC-25EACDE65ABE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D650E536-758E-4486-9DEC-25EACDE65ABE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D650E536-758E-4486-9DEC-25EACDE65ABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D650E536-758E-4486-9DEC-25EACDE65ABE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
