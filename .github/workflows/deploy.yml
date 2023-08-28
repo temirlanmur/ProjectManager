@@ -58,5 +58,5 @@ jobs:
         with:
           app-name: 'ProjectManagerAPI'
           slot-name: 'production'
-          publish-profile: ${{ secrets.AzureAppService_PublishProfile_362e6fff16304b3194d39ee721f52475 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E82B42A31E4A4E7D9CAE36C0CBBE9333 }}
           package: .
